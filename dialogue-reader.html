@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>對話朗讀器</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --surface2: #F0EEE9;
+    --border: #E0DDD6;
+    --text: #1A1916;
+    --text2: #6B6860;
+    --blue: #2563EB;
+    --blue-bg: #EFF6FF;
+    --blue-border: #BFDBFE;
+    --green: #16A34A;
+    --green-bg: #F0FDF4;
+    --green-border: #BBF7D0;
+    --amber: #B45309;
+    --amber-bg: #FFFBEB;
+    --amber-border: #FDE68A;
+    --accent: #2563EB;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  header { margin-bottom: 1.75rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  header p { font-size: 14px; color: var(--text2); }
+
+  .hint-box {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #1D4ED8;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 15px;
+    line-height: 1.75;
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: var(--accent); }
+
+  .voice-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 560px) {
+    .voice-grid { grid-template-columns: 1fr; }
+  }
+
+  .voice-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+
+  .role-label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot-a { background: var(--blue); }
+  .dot-b { background: var(--green); }
+  .dot-t { background: var(--amber); }
+  .col-a { color: var(--blue); }
+  .col-b { color: var(--green); }
+  .col-t { color: var(--amber); }
+
+  select {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    outline: none;
+    cursor: pointer;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .speed-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .speed-row label { font-size: 12px; color: var(--text2); white-space: nowrap; }
+  .speed-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .spv { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; color: var(--text); }
+
+  .preview-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px 0;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: background 0.15s, color 0.15s;
+  }
+  .preview-btn:hover { background: var(--border); color: var(--text); }
+
+  .gap-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+  }
+  .gap-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+  .gap-row input[type=range] { flex: 1; accent-color: var(--accent); }
+
+  .playback-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 1rem;
+  }
+
+  .btn-play {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
+  .btn-play:hover { background: #1D4ED8; }
+  .btn-play:active { transform: scale(0.95); }
+  .btn-play.paused { background: #6B7280; box-shadow: none; }
+
+  .btn-stop {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .btn-stop:hover { background: var(--border); }
+
+  .progress-wrap { flex: 1; }
+  .progress-bg {
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .prog-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .status-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: var(--surface2);
+    color: var(--text2);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .status-badge.playing { background: #DCFCE7; color: #15803D; }
+  .status-badge.paused { background: #FEF3C7; color: #92400E; }
+  .status-badge.done { background: var(--blue-bg); color: #1D4ED8; }
+
+  .dialogue-box {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1rem;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .dialogue-box.visible { display: flex; }
+
+  .dline {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .dline.act-a { background: var(--blue-bg); border-color: var(--blue-border); }
+  .dline.act-b { background: var(--green-bg); border-color: var(--green-border); }
+  .dline.act-t { background: var(--amber-bg); border-color: var(--amber-border); }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .av-a { background: var(--blue-border); color: #1D4ED8; }
+  .av-b { background: var(--green-border); color: #15803D; }
+  .av-t { background: var(--amber-border); color: #92400E; }
+
+  .line-text { font-size: 15px; line-height: 1.7; color: var(--text); padding-top: 4px; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-sec {
+    font-size: 13px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-sec:hover { background: var(--surface2); }
+
+  .no-support {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text2);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎧 對話朗讀器</h1>
+    <p>A、B 對話 ＋ 老師旁白，三種聲音自動切換</p>
+  </header>
+
+  <div id="no-support" class="no-support">
+    ⚠️ 此瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。
+  </div>
+
+  <div class="hint-box">
+    📌 格式說明：<br>
+    <strong>A：</strong> 開頭 → A 角色朗讀<br>
+    <strong>B：</strong> 開頭 → B 角色朗讀<br>
+    其他行（題目、說明）→ 老師旁白朗讀
+  </div>
+
+  <div class="card">
+    <div class="card-title">對話內容</div>
+    <textarea id="dialogue-input" placeholder="聽男女對話，回答問題。&#10;A：一件300。&#10;B：有打折嗎？&#10;A：抱歉，沒有。&#10;請問男的想買什麼？"></textarea>
+  </div>
+
+  <div class="voice-grid">
+    <div class="voice-card">
+      <div class="role-label col-a"><span class="dot dot-a"></span>A 角色</div>
+      <select id="voice-a"></select>
+      <button class="preview-btn" onclick="preview('a')">▶ 試聽 A</button>
+      <div class="speed-row">
+        <label>速度</label>
+        <input type="range" id="sp-a" min="0.5" max="1.3" step="0.05" value="0.65"
+          oninput="document.getElementById('spv-a').textContent=parseFloat(this.value).toFixed(2)+'×'">
+        <span class="spv" id="spv-a">0.65×</span>
+      </div>
+    </div>
+    <div class="voice-card">
+      <div class="role-label col-b"><span class="dot dot-b"></span>B 角色</div>
+      <select id="voice-b"></select>
+      <button class="preview-btn" onclick="preview('b')">▶ 試聽 B</button>
+      <div class="speed-row">
+        <label>速度</label>
+        <input type="range" id="sp-b" min="0.5" max="1.3" step="0.05" value="0.65"
+          oninput="document.getElementById('spv-b').textContent=parseFloat(this.value).toFixed(2)+'×'">
+        <span class="spv" id="spv-b">0.65×</span>
+      </div>
+    </div>
+    <div class="voice-card">
+      <div class="role-label col-t"><span class="dot dot-t"></span>老師旁白</div>
+      <select id="voice-t"></select>
+      <button class="preview-btn" onclick="preview('t')">▶ 試聽老師</button>
+      <div class="speed-row">
+        <label>速度</label>
+        <input type="range" id="sp-t" min="0.5" max="1.3" step="0.05" value="0.7"
+          oninput="document.getElementById('spv-t').textContent=parseFloat(this.value).toFixed(2)+'×'">
+        <span class="spv" id="spv-t">0.70×</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gap-row">
+    <label>換場停頓</label>
+    <input type="range" id="gap-dur" min="200" max="1500" step="100" value="700"
+      oninput="document.getElementById('gap-val').textContent=this.value+'ms'">
+    <span class="spv" id="gap-val">700ms</span>
+  </div>
+
+  <div class="playback-bar">
+    <button class="btn-play" id="btn-play" title="播放 / 暫停">▶</button>
+    <button class="btn-stop" id="btn-stop" title="停止">■</button>
+    <div class="progress-wrap">
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+      <div class="prog-labels">
+        <span id="line-cur">0</span>
+        <span id="line-total">0 行</span>
+      </div>
+    </div>
+    <span class="status-badge" id="status-msg">準備就緒</span>
+  </div>
+
+  <div class="dialogue-box" id="dialogue-box"></div>
+
+  <div class="btn-row">
+    <button class="btn-sec" id="btn-clear">🗑 清除</button>
+    <button class="btn-sec" id="btn-demo">📄 載入示範</button>
+  </div>
+
+  <footer>對話朗讀器 · 請使用 Chrome 或 Edge 瀏覽器</footer>
+</div>
+
+<script>
+const synth = window.speechSynthesis;
+if (!synth) document.getElementById('no-support').style.display = 'block';
+
+let allVoices = [];
+let lines = [], curIdx = 0, playing = false, paused = false, stopReq = false;
+
+const BLOCKED = ['grandma','grandpa','flo','sandy','shelley','eddy','zh-hk','yue','cantonese'];
+
+const DEMO = `聽男女對話，回答問題。
+A：歡迎光臨，看看哦！
+B：你好，請問有台灣特色的T恤嗎？
+A：有，您自己穿還是送人呢？
+B：送人。
+A：好的，這是今年的新款，您覺得怎麼樣？
+B：這件太紅了。
+A：我們有5種顏色。
+B：多少錢？
+A：一件300。
+B：有打折嗎？
+A：抱歉，沒有。
+B：我多買幾件，可以打折嗎？
+A：可以，買5送1。
+B：那，黑、黃、藍各兩件。
+請問男的最後買了幾件？`;
+
+function isBlocked(v) {
+  const k = (v.name + ' ' + v.lang).toLowerCase();
+  return BLOCKED.some(b => k.includes(b));
+}
+
+function getPool() {
+  const zh = allVoices.filter(v =>
+    (v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-CN')) && !isBlocked(v)
+  );
+  return zh.length ? zh : allVoices.filter(v => !isBlocked(v));
+}
+
+function populateAll() {
+  const pool = getPool();
+  const opts = pool.map(v =>
+    `<option value="${allVoices.indexOf(v)}">${v.name} (${v.lang})</option>`
+  ).join('');
+  ['a','b','t'].forEach(r => {
+    document.getElementById('voice-' + r).innerHTML = opts || '<option>（無語音）</option>';
+  });
+  if (pool.length >= 2) document.getElementById('voice-b').selectedIndex = 1;
+  if (pool.length >= 3) document.getElementById('voice-t').selectedIndex = 2;
+}
+
+function loadVoices() {
+  allVoices = synth.getVoices();
+  if (!allVoices.length) return;
+  populateAll();
+}
+if (synth) { synth.onvoiceschanged = loadVoices; loadVoices(); }
+
+const previewText = {
+  a: '你好，我是A角色，很高興認識你。',
+  b: '你好，我是B角色，很高興認識你。',
+  t: '同學，請注意聽，現在開始題目。'
+};
+
+function preview(role) {
+  synth.cancel();
+  const vIdx = parseInt(document.getElementById('voice-' + role).value);
+  const rate = parseFloat(document.getElementById('sp-' + role).value);
+  const u = new SpeechSynthesisUtterance(previewText[role]);
+  u.rate = rate;
+  if (!isNaN(vIdx) && allVoices[vIdx]) u.voice = allVoices[vIdx];
+  synth.speak(u);
+}
+
+function parseLines(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^([AB])[：:]\s*(.+)/i);
+    if (m) return { role: m[1].toUpperCase(), text: m[2].trim() };
+    return { role: 'T', text: l };
+  });
+}
+
+function actClass(r) { return r==='A'?'act-a':r==='B'?'act-b':'act-t'; }
+function avClass(r) { return r==='A'?'av-a':r==='B'?'av-b':'av-t'; }
+function avLabel(r) { return r==='A'?'A':r==='B'?'B':'師'; }
+
+function renderDialogue(activeIdx) {
+  const box = document.getElementById('dialogue-box');
+  box.classList.add('visible');
+  box.innerHTML = lines.map((l, i) =>
+    `<div class="dline ${i===activeIdx ? actClass(l.role) : ''}" id="dl-${i}">
+      <div class="avatar ${avClass(l.role)}">${avLabel(l.role)}</div>
+      <div class="line-text">${l.text}</div>
+    </div>`
+  ).join('');
+  const el = document.getElementById('dl-' + activeIdx);
+  if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function setStatus(text, cls) {
+  const el = document.getElementById('status-msg');
+  el.textContent = text;
+  el.className = 'status-badge' + (cls ? ' ' + cls : '');
+}
+
+function setPlayBtn(isPlaying) {
+  const bp = document.getElementById('btn-play');
+  bp.innerHTML = isPlaying ? '⏸' : '▶';
+  bp.className = 'btn-play' + (isPlaying ? '' : ' paused');
+}
+
+async function speakLine(idx) {
+  if (stopReq || idx >= lines.length) { finish(); return; }
+  curIdx = idx;
+  const l = lines[idx];
+  renderDialogue(idx);
+  document.getElementById('line-cur').textContent = idx + 1;
+  document.getElementById('prog-fill').style.width = Math.round((idx / lines.length) * 100) + '%';
+
+  const roleKey = l.role === 'A' ? 'a' : l.role === 'B' ? 'b' : 't';
+  const vIdx = parseInt(document.getElementById('voice-' + roleKey).value);
+  const rate = parseFloat(document.getElementById('sp-' + roleKey).value);
+
+  await new Promise(res => {
+    const u = new SpeechSynthesisUtterance(l.text);
+    u.rate = rate;
+    if (!isNaN(vIdx) && allVoices[vIdx]) u.voice = allVoices[vIdx];
+    u.onend = res; u.onerror = res;
+    synth.speak(u);
+  });
+
+  if (stopReq) { finish(); return; }
+  await new Promise(r => setTimeout(r, parseInt(document.getElementById('gap-dur').value)));
+  if (!stopReq && playing) speakLine(idx + 1);
+}
+
+function start() {
+  const text = document.getElementById('dialogue-input').value.trim();
+  if (!text) { setStatus('請輸入內容'); return; }
+  lines = parseLines(text);
+  document.getElementById('line-total').textContent = lines.length + ' 行';
+  playing = true; paused = false; stopReq = false;
+  setPlayBtn(true);
+  setStatus('朗讀中...', 'playing');
+  document.getElementById('prog-fill').style.width = '0%';
+  synth.cancel();
+  speakLine(0);
+}
+
+function finish() {
+  playing = false; paused = false;
+  setPlayBtn(false);
+  if (stopReq) {
+    setStatus('已停止');
+  } else {
+    setStatus('完成 ✓', 'done');
+    document.getElementById('prog-fill').style.width = '100%';
+    document.getElementById('line-cur').textContent = lines.length;
+  }
+}
+
+document.getElementById('btn-play').addEventListener('click', () => {
+  if (!synth) return;
+  if (!playing && !paused) { start(); return; }
+  if (playing) {
+    synth.pause(); playing = false; paused = true;
+    setPlayBtn(false);
+    setStatus('已暫停', 'paused');
+  } else {
+    synth.resume(); paused = false; playing = true;
+    setPlayBtn(true);
+    setStatus('朗讀中...', 'playing');
+  }
+});
+
+document.getElementById('btn-stop').addEventListener('click', () => {
+  stopReq = true; playing = false; paused = false;
+  synth.cancel();
+  setPlayBtn(false);
+  setStatus('已停止');
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('line-cur').textContent = '0';
+  document.getElementById('dialogue-box').classList.remove('visible');
+});
+
+document.getElementById('btn-clear').addEventListener('click', () => {
+  stopReq = true; synth && synth.cancel();
+  document.getElementById('dialogue-input').value = '';
+  document.getElementById('dialogue-box').classList.remove('visible');
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('line-cur').textContent = '0';
+  document.getElementById('line-total').textContent = '0 行';
+  setStatus('準備就緒');
+  playing = false; paused = false;
+  setPlayBtn(false);
+});
+
+document.getElementById('btn-demo').addEventListener('click', () => {
+  document.getElementById('dialogue-input').value = DEMO;
+});
+</script>
+</body>
+</html>
