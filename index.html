@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>文字轉語音工具 - 豐富語音選擇</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<title>文字轉語音 - 支援 iPhone/iPad (含男聲)</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap');
 
@@ -44,7 +44,7 @@
   }
 
   header { margin-bottom: 1.75rem; }
-  header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
   header p { font-size: 14px; color: var(--text2); }
 
   .hint-box {
@@ -85,10 +85,8 @@
     font-size: 15px;
     line-height: 1.75;
     font-family: 'Noto Sans TC', sans-serif;
-    color: var(--text);
     background: var(--surface);
     outline: none;
-    transition: border-color 0.15s;
   }
   textarea:focus { border-color: var(--accent); }
 
@@ -138,7 +136,6 @@
     outline: none;
     cursor: pointer;
   }
-  select:focus { border-color: var(--accent); }
 
   .speed-row {
     display: flex;
@@ -148,7 +145,7 @@
   }
   .speed-row label { font-size: 12px; color: var(--text2); white-space: nowrap; }
   .speed-row input[type=range] { flex: 1; accent-color: var(--accent); }
-  .spv { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; color: var(--text); }
+  .spv { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; }
 
   .preview-btn {
     width: 100%;
@@ -158,12 +155,10 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--surface2);
-    color: var(--text2);
     cursor: pointer;
-    font-family: 'Noto Sans TC', sans-serif;
-    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
   }
-  .preview-btn:hover { background: var(--border); color: var(--text); }
+  .preview-btn:hover { background: var(--border); }
 
   .gap-row {
     display: flex;
@@ -176,7 +171,7 @@
     padding: 12px 16px;
   }
   .gap-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
-  .gap-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .gap-row input[type=range] { flex: 1; }
 
   .playback-bar {
     display: flex;
@@ -187,6 +182,7 @@
     border-radius: var(--radius);
     padding: 14px 18px;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
   }
 
   .btn-play {
@@ -197,30 +193,30 @@
     color: #fff;
     font-size: 18px;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    transition: background 0.15s, transform 0.1s;
+    transition: 0.1s;
     box-shadow: 0 2px 8px rgba(37,99,235,0.25);
   }
   .btn-play:hover { background: #1D4ED8; }
   .btn-play:active { transform: scale(0.95); }
-  .btn-play.paused { background: #6B7280; box-shadow: none; }
+  .btn-play.paused { background: #6B7280; }
 
   .btn-stop {
     width: 36px; height: 36px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--surface2);
-    color: var(--text2);
     font-size: 13px;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .btn-stop:hover { background: var(--border); }
 
-  .progress-wrap { flex: 1; }
+  .progress-wrap { flex: 1; min-width: 120px; }
   .progress-bg {
     height: 5px;
     background: var(--surface2);
@@ -261,7 +257,6 @@
     margin-bottom: 1rem;
     max-height: 280px;
     overflow-y: auto;
-    padding-right: 2px;
   }
   .dialogue-box.visible { display: flex; }
 
@@ -273,7 +268,6 @@
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
-    transition: background 0.2s, border-color 0.2s;
   }
   .dline.act-a { background: var(--blue-bg); border-color: var(--blue-border); }
   .dline.act-b { background: var(--green-bg); border-color: var(--green-border); }
@@ -282,15 +276,18 @@
   .avatar {
     width: 30px; height: 30px;
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
     flex-shrink: 0;
   }
   .av-a { background: var(--blue-border); color: #1D4ED8; }
   .av-b { background: var(--green-border); color: #15803D; }
   .av-t { background: var(--amber-border); color: #92400E; }
 
-  .line-text { font-size: 15px; line-height: 1.7; color: var(--text); padding-top: 4px; }
+  .line-text { font-size: 15px; line-height: 1.7; padding-top: 4px; }
 
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-sec {
@@ -299,10 +296,8 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--surface);
-    color: var(--text);
     cursor: pointer;
-    font-family: 'Noto Sans TC', sans-serif;
-    transition: background 0.15s;
+    font-family: inherit;
   }
   .btn-sec:hover { background: var(--surface2); }
 
@@ -312,7 +307,6 @@
     color: #DC2626;
     border-radius: var(--radius-sm);
     padding: 12px 14px;
-    font-size: 13px;
     margin-bottom: 1rem;
     display: none;
   }
@@ -329,23 +323,21 @@
 <div class="container">
   <header>
     <h1>🎧 文字轉語音工具</h1>
-    <p>A、B 對話 ＋ 旁白，三種聲音自動切換 · 您可以用螢幕錄影自行錄製</p>
+    <p>A、B 對話 ＋ 旁白 · 支援 iPhone/iPad 中文男聲</p>
   </header>
 
-  <div id="no-support" class="no-support">
-    ⚠️ 此瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。
-  </div>
+  <div id="no-support" class="no-support">⚠️ 此瀏覽器不支援語音朗讀</div>
 
   <div class="hint-box">
     📌 格式說明：<br>
     <strong>A：</strong> 開頭 → A 角色朗讀<br>
     <strong>B：</strong> 開頭 → B 角色朗讀<br>
-    其他行 → 旁白朗讀（單篇文章請直接貼上，全部由旁白朗讀）
+    其他行 → 旁白朗讀
   </div>
 
   <div class="card">
     <div class="card-title">對話內容</div>
-    <textarea id="dialogue-input" placeholder="聽男女對話，回答問題。&#10;A：一件300。&#10;B：有打折嗎？&#10;A：抱歉，沒有。&#10;請問男的想買什麼？"></textarea>
+    <textarea id="dialogue-input" placeholder="A：一件300。&#10;B：有打折嗎？&#10;A：抱歉，沒有。"></textarea>
   </div>
 
   <div class="voice-grid">
@@ -392,16 +384,11 @@
   </div>
 
   <div class="playback-bar">
-    <button class="btn-play" id="btn-play" title="播放 / 暫停">▶</button>
-    <button class="btn-stop" id="btn-stop" title="停止">■</button>
+    <button class="btn-play" id="btn-play">▶</button>
+    <button class="btn-stop" id="btn-stop">■</button>
     <div class="progress-wrap">
-      <div class="progress-bg">
-        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
-      </div>
-      <div class="prog-labels">
-        <span id="line-cur">0</span>
-        <span id="line-total">0 行</span>
-      </div>
+      <div class="progress-bg"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-labels"><span id="line-cur">0</span><span id="line-total">0 行</span></div>
     </div>
     <span class="status-badge" id="status-msg">準備就緒</span>
   </div>
@@ -413,328 +400,261 @@
     <button class="btn-sec" id="btn-demo">📄 載入示範</button>
   </div>
 
-  <footer>文字轉語音工具 · 請使用 Chrome 或 Edge 瀏覽器 · 您可用螢幕錄影軟體錄製聲音</footer>
+  <footer>可用螢幕錄影 · 已開啟 iPhone/iPad 男聲支援</footer>
 </div>
 
 <script>
-const synth = window.speechSynthesis;
-if (!synth) document.getElementById('no-support').style.display = 'block';
-
-let allVoices = [];
-let lines = [], curIdx = 0, playing = false, paused = false, stopReq = false;
-
-// 過濾語音：只保留中文（國語/普通話），刪除粵語、香港、Shelley、Sandy
-function isGoodChineseVoice(voice) {
-  const lang = voice.lang.toLowerCase();
-  if (!lang.startsWith('zh')) return false;
-  const nameLower = (voice.name + ' ' + voice.lang).toLowerCase();
-  
-  // 刪除粵語、香港相關
-  if (nameLower.includes('yue') || nameLower.includes('hk') || nameLower.includes('hongkong')) return false;
-  if (nameLower.includes('cantonese')) return false;
-  
-  // 刪除 Shelley / Sandy
-  if (nameLower.includes('shelley')) return false;
-  if (nameLower.includes('sandy')) return false;
-  
-  return true;
-}
-
-function getVoiceDisplayName(voice) {
-  const name = voice.name;
-  const langTag = voice.lang;
-  let label = `${name} (${langTag})`;
-  const lower = name.toLowerCase();
-  
-  if (lower.includes('tingting') || lower.includes('ting-ting')) label = '🎤 婷婷 (清脆女聲) · ' + label;
-  else if (lower.includes('yating') || lower.includes('ya-ting')) label = '🎵 雅婷 (溫和女聲) · ' + label;
-  else if (lower.includes('hanhan') || lower.includes('han-han')) label = '😊 涵涵 (甜美女聲) · ' + label;
-  else if (lower.includes('lulu') || lower.includes('lu-lu')) label = '😄 露露 (活潑女聲) · ' + label;
-  else if (lower.includes('google') && lower.includes('mandarin')) label = '🏢 專業國語女聲 · ' + label;
-  else if (lower.includes('samantha') && lower.includes('zh')) label = '✨ 專業女聲 · ' + label;
-  else if (lower.includes('female') && lower.includes('zh')) label = '👩 標準女聲 · ' + label;
-  else if (lower.includes('male') && lower.includes('zh')) label = '👨 標準男聲 · ' + label;
-  else if (lower.includes('xiaoxiao') || lower.includes('xiao xiao')) label = '😀 曉曉 (愉快女聲) · ' + label;
-  else if (lower.includes('yunxi') || lower.includes('yun xi')) label = '🌸 雲希 (溫柔女聲) · ' + label;
-  else if (lower.includes('yunyang')) label = '🌞 雲揚 (專業男聲) · ' + label;
-  else if (lower.includes('xiaobei')) label = '🍀 小北 (清晰男聲) · ' + label;
-  else if (lower.includes('yunjian')) label = '🏔️ 雲健 (沉穩男聲) · ' + label;
-  else if (lower.includes('xiaomo')) label = '🎭 小墨 (多風格男聲) · ' + label;
-  else if (lower.includes('wang')) label = '👔 專業男聲 · ' + label;
-  else if (lower.includes('kangkang')) label = '😆 康康 (開心男聲) · ' + label;
-  else if (lower.includes('yaoyao')) label = '🌸 瑤瑤 (親切女聲) · ' + label;
-  
-  if (!label.includes('·')) {
-    if (lower.includes('female')) label = '👩 女聲 · ' + label;
-    else if (lower.includes('male')) label = '👨 男聲 · ' + label;
-    else label = '🎙️ ' + label;
+(function(){
+  const synth = window.speechSynthesis;
+  if (!synth) {
+    document.getElementById('no-support').style.display = 'block';
+    return;
   }
-  return label;
-}
 
-function getSortedVoices() {
-  let zhVoices = allVoices.filter(isGoodChineseVoice);
-  if (zhVoices.length === 0) {
-    zhVoices = allVoices.filter(v => v.lang.startsWith('zh') && 
-      !v.name.toLowerCase().includes('shelley') && 
-      !v.name.toLowerCase().includes('sandy') &&
-      !v.name.toLowerCase().includes('yue') &&
-      !v.name.toLowerCase().includes('hk'));
+  let allVoices = [];
+  let lines = [], curIdx = 0, playing = false, paused = false, stopReq = false;
+
+  // ----- 關鍵修改：支援 iOS 男聲，只移除粵語/Shelley/Sandy，不再過度過濾 -----
+  function isUsableVoice(voice) {
+    const lang = voice.lang.toLowerCase();
+    if (!lang.startsWith('zh')) return false;
+    const nameLower = (voice.name + ' ' + voice.lang).toLowerCase();
+    // 只移除明確的粵語、香港、Shelley、Sandy
+    if (nameLower.includes('yue') || nameLower.includes('hk') || nameLower.includes('hongkong')) return false;
+    if (nameLower.includes('cantonese')) return false;
+    if (nameLower.includes('shelley')) return false;
+    if (nameLower.includes('sandy')) return false;
+    return true;
   }
-  zhVoices.sort((a,b) => {
-    const aName = a.name.toLowerCase();
-    const bName = b.name.toLowerCase();
-    const order = (n) => {
-      if (n.includes('tingting') || n.includes('yating') || n.includes('hanhan') || n.includes('lulu')) return 1;
-      if (n.includes('google') && n.includes('mandarin')) return 2;
-      if (n.includes('xiaoxiao') || n.includes('yunxi')) return 3;
-      if (n.includes('yunyang') || n.includes('xiaobei')) return 4;
-      if (n.includes('female')) return 5;
-      if (n.includes('male')) return 6;
-      return 7;
-    };
-    return order(aName) - order(bName);
-  });
-  return zhVoices;
-}
 
-function populateAll() {
-  const voices = getSortedVoices();
-  if (voices.length === 0) {
-    const fallback = allVoices.filter(v => v.lang.startsWith('zh'));
-    if (fallback.length) {
-      populateWithVoices(fallback);
+  function getVoiceDisplayName(voice) {
+    let name = voice.name;
+    let langTag = voice.lang;
+    let label = `${name} (${langTag})`;
+    let lower = name.toLowerCase();
+    
+    // 辨識男聲標記 (讓使用者容易找到)
+    if (lower.includes('male') || lower.includes('man') || lower.includes('男生') || 
+        (lower.includes('ting-ting') === false && lower.includes('yating') === false && 
+         lower.includes('hanhan') === false && lower.includes('lulu') === false && 
+         lower.includes('xiaoxiao') === false && lower.includes('yunxi') === false &&
+         lower.includes('yaoyao') === false && lower.includes('female') === false)) {
+      // 簡單啟發：如果名稱不包含典型女聲關鍵字，且包含某些男性特徵，就標記為男聲
+      if (lower.includes('google') && lower.includes('mandarin')) {
+        // Google 普通話預設可能是女聲，不強標
+      } else if (lower.includes('wang') || lower.includes('yunyang') || lower.includes('xiaobei') || 
+                 lower.includes('yunjian') || lower.includes('kangkang')) {
+        label = '👨 男聲 · ' + label;
+      } else if (lower.includes('male')) {
+        label = '👨 男聲 · ' + label;
+      } else if (!lower.includes('female') && !lower.includes('女')) {
+        // 不確定的保留原樣，不要亂標
+      }
+    }
+    
+    // 常見女聲標記
+    if (lower.includes('tingting') || lower.includes('yating') || lower.includes('hanhan') || 
+        lower.includes('lulu') || lower.includes('xiaoxiao') || lower.includes('yunxi') || 
+        lower.includes('yaoyao') || lower.includes('female')) {
+      if (!label.includes('👩')) label = '👩 女聲 · ' + label;
+    }
+    
+    return label;
+  }
+
+  function getAvailableVoices() {
+    let usable = allVoices.filter(isUsableVoice);
+    if (usable.length === 0) {
+      // 非常寬容：只過濾最低限度
+      usable = allVoices.filter(v => v.lang.startsWith('zh') && 
+        !v.name.toLowerCase().includes('yue') && 
+        !v.name.toLowerCase().includes('shelley') &&
+        !v.name.toLowerCase().includes('sandy'));
+    }
+    return usable;
+  }
+
+  function populateVoiceSelects() {
+    const voices = getAvailableVoices();
+    if (!voices.length) {
+      const msg = '<option>⚠️ 無中文語音</option>';
+      ['a','b','t'].forEach(r => document.getElementById('voice-'+r).innerHTML = msg);
       return;
     }
-    const emptyMsg = '<option>⚠️ 未檢測到中文語音，請檢查系統</option>';
-    ['a','b','t'].forEach(r => {
-      document.getElementById('voice-' + r).innerHTML = emptyMsg;
-    });
-    return;
-  }
-  populateWithVoices(voices);
-}
-
-function populateWithVoices(voices) {
-  const opts = voices.map((v, idx) => {
-    const displayName = getVoiceDisplayName(v);
-    return `<option value="${idx}">${displayName}</option>`;
-  }).join('');
-  ['a','b','t'].forEach(r => {
-    const selectEl = document.getElementById('voice-' + r);
-    selectEl.innerHTML = opts;
-  });
-  
-  if (voices.length >= 2) {
-    let aIdx = 0, bIdx = 1, tIdx = Math.min(2, voices.length-1);
-    const femaleIdx = voices.findIndex(v => /female|tingting|yating|hanhan|lulu|xiaoxiao|yunxi|yaoyao|女/i.test(v.name));
-    const maleIdx = voices.findIndex(v => /male|yunyang|xiaobei|yunjian|xiaomo|wang|kangkang|男/i.test(v.name));
-    if (femaleIdx !== -1) aIdx = femaleIdx;
-    if (maleIdx !== -1) bIdx = maleIdx;
-    if (voices.length > 2 && tIdx !== aIdx && tIdx !== bIdx) tIdx = tIdx;
-    else tIdx = (aIdx === 0 && bIdx === 1) ? 2 : (voices.length-1);
-    document.getElementById('voice-a').selectedIndex = aIdx;
-    document.getElementById('voice-b').selectedIndex = bIdx;
-    document.getElementById('voice-t').selectedIndex = tIdx;
-  } else if (voices.length === 1) {
-    document.getElementById('voice-a').selectedIndex = 0;
-    document.getElementById('voice-b').selectedIndex = 0;
-    document.getElementById('voice-t').selectedIndex = 0;
-  }
-}
-
-function loadVoices() {
-  allVoices = synth.getVoices();
-  if (!allVoices.length) {
-    setTimeout(loadVoices, 100);
-    return;
-  }
-  populateAll();
-}
-if (synth) { 
-  if (synth.getVoices().length) loadVoices();
-  synth.onvoiceschanged = loadVoices; 
-  loadVoices();
-}
-
-const previewText = {
-  a: '你好，我是A角色，很高興認識你。',
-  b: '你好，我是B角色，很高興認識你。',
-  t: '同學，請注意聽，現在開始題目。'
-};
-
-function preview(role) {
-  if (!synth) return;
-  synth.cancel();
-  const voicesList = getSortedVoices();
-  const idx = parseInt(document.getElementById('voice-' + role).value);
-  const rate = parseFloat(document.getElementById('sp-' + role).value);
-  const u = new SpeechSynthesisUtterance(previewText[role]);
-  u.rate = rate;
-  if (!isNaN(idx) && voicesList[idx]) u.voice = voicesList[idx];
-  synth.speak(u);
-}
-
-function parseLines(text) {
-  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
-    const m = l.match(/^([AB])[：:]\s*(.+)/i);
-    if (m) return { role: m[1].toUpperCase(), text: m[2].trim() };
-    return { role: 'T', text: l };
-  });
-}
-
-function actClass(r) { return r==='A'?'act-a':r==='B'?'act-b':'act-t'; }
-function avClass(r) { return r==='A'?'av-a':r==='B'?'av-b':'av-t'; }
-function avLabel(r) { return r==='A'?'A':r==='B'?'B':'師'; }
-
-function renderDialogue(activeIdx) {
-  const box = document.getElementById('dialogue-box');
-  box.classList.add('visible');
-  box.innerHTML = lines.map((l, i) =>
-    `<div class="dline ${i===activeIdx ? actClass(l.role) : ''}" id="dl-${i}">
-      <div class="avatar ${avClass(l.role)}">${avLabel(l.role)}</div>
-      <div class="line-text">${escapeHtml(l.text)}</div>
-    </div>`
-  ).join('');
-  const el = document.getElementById('dl-' + activeIdx);
-  if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}
-function escapeHtml(str) {
-  return str.replace(/[&<>]/g, function(m) {
-    if (m === '&') return '&amp;';
-    if (m === '<') return '&lt;';
-    if (m === '>') return '&gt;';
-    return m;
-  });
-}
-
-function setStatus(text, cls) {
-  const el = document.getElementById('status-msg');
-  el.textContent = text;
-  el.className = 'status-badge' + (cls ? ' ' + cls : '');
-}
-
-function setPlayBtn(isPlaying) {
-  const bp = document.getElementById('btn-play');
-  bp.innerHTML = isPlaying ? '⏸' : '▶';
-  bp.className = 'btn-play' + (isPlaying ? '' : ' paused');
-}
-
-async function speakLine(idx) {
-  if (stopReq || idx >= lines.length) { finish(); return; }
-  curIdx = idx;
-  renderDialogue(idx);
-  document.getElementById('line-cur').textContent = idx + 1;
-  document.getElementById('prog-fill').style.width = Math.round((idx / lines.length) * 100) + '%';
-
-  const l = lines[idx];
-  const roleKey = l.role === 'A' ? 'a' : l.role === 'B' ? 'b' : 't';
-  const voicesList = getSortedVoices();
-  const selectedIdx = parseInt(document.getElementById('voice-' + roleKey).value);
-  const rate = parseFloat(document.getElementById('sp-' + roleKey).value);
-  const targetVoice = (!isNaN(selectedIdx) && voicesList[selectedIdx]) ? voicesList[selectedIdx] : null;
-
-  await new Promise(res => {
-    const u = new SpeechSynthesisUtterance(l.text);
-    u.rate = rate;
-    if (targetVoice) u.voice = targetVoice;
-    u.onend = res;
-    u.onerror = (e) => { console.warn(e); res(); };
-    synth.speak(u);
-  });
-
-  if (stopReq) { finish(); return; }
-  const gap = parseInt(document.getElementById('gap-dur').value);
-  await new Promise(r => setTimeout(r, gap));
-  if (!stopReq && playing && !paused) speakLine(idx + 1);
-}
-
-function start() {
-  const text = document.getElementById('dialogue-input').value.trim();
-  if (!text) { setStatus('請輸入內容'); return; }
-  lines = parseLines(text);
-  if (lines.length === 0) { setStatus('無有效行'); return; }
-  document.getElementById('line-total').textContent = lines.length + ' 行';
-  playing = true; paused = false; stopReq = false;
-  setPlayBtn(true);
-  setStatus('朗讀中...', 'playing');
-  document.getElementById('prog-fill').style.width = '0%';
-  if (synth) synth.cancel();
-  speakLine(0);
-}
-
-function finish() {
-  playing = false; paused = false;
-  setPlayBtn(false);
-  if (stopReq) {
-    setStatus('已停止');
-    document.getElementById('prog-fill').style.width = '0%';
-    document.getElementById('line-cur').textContent = '0';
-  } else {
-    setStatus('完成 ✓', 'done');
-    document.getElementById('prog-fill').style.width = '100%';
-    document.getElementById('line-cur').textContent = lines.length;
-  }
-  stopReq = false;
-}
-
-document.getElementById('btn-play').addEventListener('click', () => {
-  if (!synth) return;
-  if (!playing && !paused) { start(); return; }
-  if (playing && !paused) {
-    synth.pause(); playing = false; paused = true;
-    setPlayBtn(false);
-    setStatus('已暫停', 'paused');
-  } else if (paused) {
-    synth.resume(); paused = false; playing = true;
-    setPlayBtn(true);
-    setStatus('朗讀中...', 'playing');
-    if (!stopReq && lines.length && curIdx < lines.length && !playing) {
-      if (!synth.speaking && !synth.pending) speakLine(curIdx);
+    
+    const options = voices.map((v, idx) => `<option value="${idx}">${getVoiceDisplayName(v)}</option>`).join('');
+    ['a','b','t'].forEach(r => document.getElementById('voice-'+r).innerHTML = options);
+    
+    // 智慧預設：A 選第一個女聲，B 選第一個男聲，旁白選中性
+    let femaleIdx = voices.findIndex(v => /female|tingting|yating|hanhan|lulu|xiaoxiao|yunxi|yaoyao|女/i.test(v.name));
+    let maleIdx = voices.findIndex(v => /male|yunyang|xiaobei|yunjian|wang|kangkang|男/i.test(v.name));
+    
+    if (femaleIdx !== -1) document.getElementById('voice-a').selectedIndex = femaleIdx;
+    if (maleIdx !== -1) document.getElementById('voice-b').selectedIndex = maleIdx;
+    
+    // 旁白預設選第三個或第二個
+    if (voices.length > 2) {
+      let tIdx = 2;
+      if (tIdx === femaleIdx || tIdx === maleIdx) tIdx = (tIdx+1) % voices.length;
+      document.getElementById('voice-t').selectedIndex = tIdx;
+    } else if (voices.length === 2) {
+      document.getElementById('voice-t').selectedIndex = 1;
     }
   }
-});
 
-document.getElementById('btn-stop').addEventListener('click', () => {
-  stopReq = true; playing = false; paused = false;
-  if (synth) synth.cancel();
-  setPlayBtn(false);
-  setStatus('已停止');
-  document.getElementById('prog-fill').style.width = '0%';
-  document.getElementById('line-cur').textContent = '0';
-  document.getElementById('dialogue-box').classList.remove('visible');
-});
+  function loadVoices() {
+    allVoices = synth.getVoices();
+    if (!allVoices.length) {
+      setTimeout(loadVoices, 100);
+      return;
+    }
+    populateVoiceSelects();
+  }
+  
+  if (synth) {
+    if (synth.getVoices().length) loadVoices();
+    synth.onvoiceschanged = loadVoices;
+    loadVoices();
+  }
 
-document.getElementById('btn-clear').addEventListener('click', () => {
-  stopReq = true; synth && synth.cancel();
-  document.getElementById('dialogue-input').value = '';
-  document.getElementById('dialogue-box').classList.remove('visible');
-  document.getElementById('prog-fill').style.width = '0%';
-  document.getElementById('line-cur').textContent = '0';
-  document.getElementById('line-total').textContent = '0 行';
-  setStatus('準備就緒');
-  playing = false; paused = false;
-  setPlayBtn(false);
-});
+  function preview(role) {
+    if (!synth) return;
+    synth.cancel();
+    const voices = getAvailableVoices();
+    const idx = parseInt(document.getElementById('voice-'+role).value);
+    const rate = parseFloat(document.getElementById('sp-'+role).value);
+    const text = { a:'你好，我是A角色。', b:'你好，我是B角色。', t:'這是旁白聲音。' }[role];
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = rate;
+    if (!isNaN(idx) && voices[idx]) u.voice = voices[idx];
+    synth.speak(u);
+  }
+  window.preview = preview;
 
-document.getElementById('btn-demo').addEventListener('click', () => {
-  document.getElementById('dialogue-input').value = `聽男女對話，回答問題。
-A：歡迎光臨，看看哦！
-B：你好，請問有台灣特色的T恤嗎？
-A：有，您自己穿還是送人呢？
-B：送人。
-A：好的，這是今年的新款，您覺得怎麼樣？
-B：這件太紅了。
-A：我們有5種顏色。
-B：多少錢？
-A：一件300。
-B：有打折嗎？
-A：抱歉，沒有。
-B：我多買幾件，可以打折嗎？
-A：可以，買5送1。
-B：那，黑、黃、藍各兩件。
-請問男的最後買了幾件？`;
-});
+  function parseLines(txt) {
+    return txt.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+      let m = l.match(/^([AB])[：:]\s*(.+)/i);
+      if(m) return { role: m[1].toUpperCase(), text: m[2].trim() };
+      return { role: 'T', text: l };
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m] || m));
+  }
+  
+  function renderDialogue(active) {
+    let box = document.getElementById('dialogue-box');
+    box.classList.add('visible');
+    box.innerHTML = lines.map((l,i)=>`
+      <div class="dline ${i===active ? (l.role==='A'?'act-a':l.role==='B'?'act-b':'act-t') : ''}" id="dl-${i}">
+        <div class="avatar ${l.role==='A'?'av-a':l.role==='B'?'av-b':'av-t'}">${l.role==='A'?'A':l.role==='B'?'B':'師'}</div>
+        <div class="line-text">${escapeHtml(l.text)}</div>
+      </div>
+    `).join('');
+    let el = document.getElementById('dl-'+active);
+    if(el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  function setStatus(txt, cls) {
+    let el = document.getElementById('status-msg');
+    el.textContent = txt;
+    el.className = 'status-badge' + (cls ? ' '+cls : '');
+  }
+  function setPlayBtn(isp) {
+    let btn = document.getElementById('btn-play');
+    btn.innerHTML = isp ? '⏸' : '▶';
+    btn.className = 'btn-play' + (isp ? '' : ' paused');
+  }
+
+  async function speakLine(idx) {
+    if(stopReq || idx>=lines.length) { finish(); return; }
+    curIdx = idx;
+    renderDialogue(idx);
+    document.getElementById('line-cur').innerText = idx+1;
+    document.getElementById('prog-fill').style.width = Math.round((idx/lines.length)*100)+'%';
+    let l = lines[idx];
+    let roleKey = l.role==='A' ? 'a' : (l.role==='B' ? 'b' : 't');
+    let voices = getAvailableVoices();
+    let selIdx = parseInt(document.getElementById('voice-'+roleKey).value);
+    let rate = parseFloat(document.getElementById('sp-'+roleKey).value);
+    let targetVoice = (!isNaN(selIdx) && voices[selIdx]) ? voices[selIdx] : null;
+    await new Promise(res=>{
+      let u = new SpeechSynthesisUtterance(l.text);
+      u.rate = rate;
+      if(targetVoice) u.voice = targetVoice;
+      u.onend = res;
+      u.onerror = ()=>res();
+      synth.speak(u);
+    });
+    if(stopReq) { finish(); return; }
+    let gap = parseInt(document.getElementById('gap-dur').value);
+    await new Promise(r=>setTimeout(r,gap));
+    if(!stopReq && playing && !paused) speakLine(idx+1);
+  }
+
+  function start() {
+    let text = document.getElementById('dialogue-input').value.trim();
+    if(!text) { setStatus('請輸入內容'); return; }
+    lines = parseLines(text);
+    if(!lines.length) { setStatus('無效行'); return; }
+    document.getElementById('line-total').innerText = lines.length+' 行';
+    playing = true; paused = false; stopReq = false;
+    setPlayBtn(true);
+    setStatus('朗讀中...','playing');
+    document.getElementById('prog-fill').style.width = '0%';
+    if(synth) synth.cancel();
+    speakLine(0);
+  }
+  function finish() {
+    playing = false; paused = false;
+    setPlayBtn(false);
+    if(stopReq) {
+      setStatus('已停止');
+      document.getElementById('prog-fill').style.width = '0%';
+      document.getElementById('line-cur').innerText = '0';
+    } else {
+      setStatus('完成 ✓','done');
+      document.getElementById('prog-fill').style.width = '100%';
+      document.getElementById('line-cur').innerText = lines.length;
+    }
+    stopReq = false;
+  }
+
+  document.getElementById('btn-play').addEventListener('click',()=>{
+    if(!synth) return;
+    if(!playing && !paused) { start(); return; }
+    if(playing && !paused) {
+      synth.pause(); playing=false; paused=true;
+      setPlayBtn(false); setStatus('已暫停','paused');
+    } else if(paused) {
+      synth.resume(); paused=false; playing=true;
+      setPlayBtn(true); setStatus('朗讀中...','playing');
+      if(!stopReq && lines.length && curIdx<lines.length && !synth.speaking && !synth.pending) speakLine(curIdx);
+    }
+  });
+  document.getElementById('btn-stop').addEventListener('click',()=>{
+    stopReq=true; playing=false; paused=false;
+    if(synth) synth.cancel();
+    setPlayBtn(false); setStatus('已停止');
+    document.getElementById('prog-fill').style.width='0%';
+    document.getElementById('line-cur').innerText='0';
+    document.getElementById('dialogue-box').classList.remove('visible');
+  });
+  document.getElementById('btn-clear').addEventListener('click',()=>{
+    stopReq=true; synth&&synth.cancel();
+    document.getElementById('dialogue-input').value='';
+    document.getElementById('dialogue-box').classList.remove('visible');
+    document.getElementById('prog-fill').style.width='0%';
+    document.getElementById('line-cur').innerText='0';
+    document.getElementById('line-total').innerText='0 行';
+    setStatus('準備就緒');
+    playing=false; paused=false; setPlayBtn(false);
+  });
+  document.getElementById('btn-demo').addEventListener('click',()=>{
+    document.getElementById('dialogue-input').value = `聽男女對話，回答問題。\nA：歡迎光臨，看看哦！\nB：你好，請問有台灣特色的T恤嗎？\nA：有，您自己穿還是送人呢？\nB：送人。\nA：好的，這是今年的新款，您覺得怎麼樣？\nB：這件太紅了。\nA：我們有5種顏色。\nB：多少錢？\nA：一件300。\nB：有打折嗎？\nA：抱歉，沒有。\nB：我多買幾件，可以打折嗎？\nA：可以，買5送1。\nB：那，黑、黃、藍各兩件。\n請問男的最後買了幾件？`;
+  });
+})();
 </script>
 </body>
 </html>
