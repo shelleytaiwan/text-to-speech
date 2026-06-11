@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>文字轉語音工具 - 對話+旁白 | 匯出/匯入設定</title>
+<title>文字轉語音工具</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap');
 
@@ -28,8 +28,6 @@
     --accent: #2563EB;
     --radius: 10px;
     --radius-sm: 6px;
-    --success: #10B981;
-    --success-bg: #D1FAE5;
   }
 
   body {
@@ -45,7 +43,7 @@
     margin: 0 auto;
   }
 
-  header { margin-bottom: 1.5rem; }
+  header { margin-bottom: 1.75rem; }
   header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
   header p { font-size: 14px; color: var(--text2); }
 
@@ -167,40 +165,18 @@
   }
   .preview-btn:hover { background: var(--border); color: var(--text); }
 
-  .pause-panel {
+  .gap-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 12px 16px;
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
   }
-  .pause-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .pause-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    min-width: 130px;
-  }
-  .pause-item input[type=range] {
-    flex: 1;
-    min-width: 140px;
-    accent-color: var(--accent);
-  }
-  .pause-val {
-    font-size: 13px;
-    font-weight: 500;
-    min-width: 55px;
-    text-align: right;
-    color: var(--text);
-  }
+  .gap-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+  .gap-row input[type=range] { flex: 1; accent-color: var(--accent); }
 
   .playback-bar {
     display: flex;
@@ -277,7 +253,6 @@
   .status-badge.playing { background: #DCFCE7; color: #15803D; }
   .status-badge.paused { background: #FEF3C7; color: #92400E; }
   .status-badge.done { background: var(--blue-bg); color: #1D4ED8; }
-  .status-badge.saved { background: var(--success-bg); color: #047857; }
 
   .dialogue-box {
     display: none;
@@ -317,15 +292,10 @@
 
   .line-text { font-size: 15px; line-height: 1.7; color: var(--text); padding-top: 4px; }
 
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-sec {
     font-size: 13px;
-    padding: 8px 14px;
+    padding: 8px 16px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--surface);
@@ -335,27 +305,35 @@
     transition: background 0.15s;
   }
   .btn-sec:hover { background: var(--surface2); }
-  .btn-export {
-    background: #EFF6FF;
-    border-color: #BFDBFE;
-    color: #1D4ED8;
-  }
-  .btn-export:hover { background: #DBEAFE; }
-  .btn-import {
-    background: #FFFBEB;
-    border-color: #FDE68A;
-    color: #B45309;
-  }
-  .btn-import:hover { background: #FEF3C7; }
-  .btn-save {
-    background: var(--success-bg);
-    border-color: #A7F3D0;
-    color: #047857;
+
+  .save-note {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 8px;
+    min-height: 1em;
   }
 
-  .file-input-hidden {
-    display: none;
+  .rec-help {
+    margin-top: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
   }
+  .rec-help summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text2);
+    user-select: none;
+  }
+  .rec-help summary:hover { color: var(--text); }
+  .rec-body {
+    margin-top: 10px;
+    line-height: 1.8;
+    color: var(--text2);
+  }
+  .rec-body strong { color: var(--text); }
 
   .no-support {
     background: #FEF2F2;
@@ -369,12 +347,10 @@
   }
 
   footer {
-    margin-top: 1rem;
+    margin-top: 2rem;
     text-align: center;
     font-size: 12px;
     color: var(--text2);
-    padding: 8px;
-    border-top: 1px solid var(--border);
   }
 </style>
 </head>
@@ -382,7 +358,7 @@
 <div class="container">
   <header>
     <h1>🎧 文字轉語音工具</h1>
-    <p>A、B 對話 ＋ 旁白 · 獨立停頓</p>
+    <p>A、B 對話 ＋ 旁白，三種聲音自動切換 · <span style="color:var(--text2)">Shelleytaiwan 使用 AI 製作</span></p>
   </header>
 
   <div id="no-support" class="no-support">
@@ -390,10 +366,11 @@
   </div>
 
   <div class="hint-box">
-    📌 <strong>格式說明</strong>：<strong>A：</strong> / <strong>B：</strong> 開頭 → 角色朗讀；其他行 → 旁白朗讀<br>
-    💾 <strong>匯出設定檔</strong>：儲存目前所有設定（文字、語音、速度、停頓）<br>
-    📂 <strong>匯入設定檔</strong>：讀取設定檔，一秒還原<br>
-    🏠 <strong>本機儲存</strong>：儲存在這台設備，下次打開自動還原
+    📌 格式說明：<br>
+    <strong>A：</strong> 開頭 → A 角色朗讀<br>
+    <strong>B：</strong> 開頭 → B 角色朗讀<br>
+    其他行 → 旁白朗讀（單篇文章請直接貼上，全部由旁白朗讀）<br>
+    ⏱ <strong>對話停頓</strong>＝A、B 對話之間；<strong>旁白停頓</strong>＝旁白前後自動加長，給學生思考作答時間
   </div>
 
   <div class="card">
@@ -437,17 +414,18 @@
     </div>
   </div>
 
-  <div class="pause-panel">
-    <div class="pause-item">
-      <span class="pause-label">對話間停頓 (A↔B)</span>
-      <input type="range" id="pause-dialog" min="300" max="1500" step="50" value="900">
-      <span class="pause-val" id="dialog-pause-val">900ms</span>
-    </div>
-    <div class="pause-item">
-      <span class="pause-label">旁白停頓 (旁白前後)</span>
-      <input type="range" id="pause-narrator" min="500" max="2500" step="50" value="1400">
-      <span class="pause-val" id="narrator-pause-val">1400ms</span>
-    </div>
+  <div class="gap-row">
+    <label>💬 對話停頓</label>
+    <input type="range" id="gap-dialog" min="200" max="3000" step="100" value="700"
+      oninput="document.getElementById('gap-dialog-val').textContent=fmtGap(this.value)">
+    <span class="spv" id="gap-dialog-val">0.7秒</span>
+  </div>
+
+  <div class="gap-row">
+    <label>📢 旁白停頓（前後）</label>
+    <input type="range" id="gap-narr" min="500" max="15000" step="500" value="4000"
+      oninput="document.getElementById('gap-narr-val').textContent=fmtGap(this.value)">
+    <span class="spv" id="gap-narr-val">4秒</span>
   </div>
 
   <div class="playback-bar">
@@ -468,16 +446,39 @@
   <div class="dialogue-box" id="dialogue-box"></div>
 
   <div class="btn-row">
+    <button class="btn-sec" id="btn-export">💾 匯出設定檔</button>
+    <button class="btn-sec" id="btn-import">📂 匯入設定檔</button>
+    <button class="btn-sec" id="btn-localsave">🏠 本機儲存</button>
     <button class="btn-sec" id="btn-clear">🗑 清除</button>
     <button class="btn-sec" id="btn-demo">📄 載入示範</button>
-    <button class="btn-sec btn-save" id="btn-save">💾 本機儲存</button>
-    <button class="btn-sec btn-export" id="btn-export">📤 匯出設定檔</button>
-    <button class="btn-sec btn-import" id="btn-import">📥 匯入設定檔</button>
   </div>
+  <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+  <div class="save-note" id="save-note"></div>
 
-  <input type="file" id="file-import" class="file-input-hidden" accept=".json" />
+  <details class="rec-help">
+    <summary>📱 iPad 只有兩種聲音？下載更多聲音（含男聲）</summary>
+    <div class="rec-body">
+      iPad / iPhone 出廠只內建少量中文聲音，可免費下載更多：<br>
+      1. 設定 → 輔助使用 → 朗讀內容（或「語音內容」）→ 聲音 → 中文<br>
+      2. 下載男聲：<strong>Eddy、Reed、Rocko</strong>（皆支援國語），女聲另有美佳、婷婷等<br>
+      3. 下載完<strong>完全關閉 Safari 再重開</strong>本工具，新聲音就會出現在選單中
+    </div>
+  </details>
 
-  <footer>📁 匯出設定檔可保存或傳給學生 · 本機儲存會自動記住</footer>
+  <details class="rec-help">
+    <summary>🎙 如何錄成聽力考試音檔（免金鑰）</summary>
+    <div class="rec-body">
+      <strong>iPad / iPhone（最推薦，內建就能錄聲音）</strong><br>
+      1. 設定 → 控制中心 → 加入「螢幕錄製」<br>
+      2. 在 Safari 開啟本工具，從右上角下滑開控制中心，按 ⏺ 開始錄製<br>
+      3. 按本工具的 ▶ 播放，唸完後停止錄製<br>
+      4. 影片會存到「照片」，含完整聲音，可直接在課堂播放<br><br>
+      <strong>Mac</strong><br>
+      Mac 內建錄製無法收系統聲音，建議改用 iPad 錄，或在 Mac 安裝免費的 BlackHole 虛擬音訊後，用 QuickTime 選 BlackHole 當輸入來錄製。
+    </div>
+  </details>
+
+  <footer>電腦請使用 Chrome 或 Edge · iPad / iPhone 請使用 Safari</footer>
 </div>
 
 <script>
@@ -486,6 +487,7 @@ if (!synth) document.getElementById('no-support').style.display = 'block';
 
 let allVoices = [];
 let lines = [], curIdx = 0, playing = false, paused = false, stopReq = false;
+let pendingVoices = null; // 聲音清單尚未載入時，暫存待還原的聲音名稱
 
 const BLOCKED = ['grandma','grandpa','flo','sandy','shelley','eddy','zh-hk','yue','cantonese'];
 
@@ -513,9 +515,12 @@ function isBlocked(v) {
 
 function getPool() {
   const zh = allVoices.filter(v =>
-    (v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-CN')) && !isBlocked(v)
+    v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-CN') || v.lang.startsWith('zh')
   );
-  return zh.length ? zh : allVoices.filter(v => !isBlocked(v));
+  const base = zh.length ? zh : allVoices;
+  const filtered = base.filter(v => !isBlocked(v));
+  // 聲音夠多（電腦）才套用封鎖名單；聲音少（iPad）就全部顯示，否則會擋掉僅有的男聲
+  return filtered.length >= 3 ? filtered : base;
 }
 
 function populateAll() {
@@ -524,27 +529,26 @@ function populateAll() {
     `<option value="${allVoices.indexOf(v)}">${v.name} (${v.lang})</option>`
   ).join('');
   ['a','b','t'].forEach(r => {
-    const select = document.getElementById('voice-' + r);
-    select.innerHTML = opts || '<option>（無語音）</option>';
+    document.getElementById('voice-' + r).innerHTML = opts || '<option>（無語音）</option>';
   });
   if (pool.length >= 2) document.getElementById('voice-b').selectedIndex = 1;
   if (pool.length >= 3) document.getElementById('voice-t').selectedIndex = 2;
+  applyPendingVoices(); // 若有待還原的聲音設定，此時套用
 }
 
 function loadVoices() {
   allVoices = synth.getVoices();
   if (!allVoices.length) return;
   populateAll();
-  setTimeout(() => { 
-    const saved = localStorage.getItem('tts_settings');
-    if (saved) {
-      try {
-        loadSettingsFromData(JSON.parse(saved), false);
-      } catch(e) {}
-    }
-  }, 100);
 }
-if (synth) { synth.onvoiceschanged = loadVoices; loadVoices(); }
+if (synth) {
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+  // iPad/iPhone 的 Safari 有時不會觸發 onvoiceschanged，延遲重試幾次
+  [300, 1000, 2500].forEach(ms => setTimeout(() => {
+    if (!allVoices.length) loadVoices();
+  }, ms));
+}
 
 const previewText = {
   a: '你好，我是A角色，很高興認識你。',
@@ -553,7 +557,6 @@ const previewText = {
 };
 
 function preview(role) {
-  if (!synth) return;
   synth.cancel();
   const vIdx = parseInt(document.getElementById('voice-' + role).value);
   const rate = parseFloat(document.getElementById('sp-' + role).value);
@@ -581,31 +584,17 @@ function renderDialogue(activeIdx) {
   box.innerHTML = lines.map((l, i) =>
     `<div class="dline ${i===activeIdx ? actClass(l.role) : ''}" id="dl-${i}">
       <div class="avatar ${avClass(l.role)}">${avLabel(l.role)}</div>
-      <div class="line-text">${escapeHtml(l.text)}</div>
+      <div class="line-text">${l.text}</div>
     </div>`
   ).join('');
   const el = document.getElementById('dl-' + activeIdx);
   if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
-function escapeHtml(str) {
-  return str.replace(/[&<>]/g, function(m) {
-    if (m === '&') return '&amp;';
-    if (m === '<') return '&lt;';
-    if (m === '>') return '&gt;';
-    return m;
-  });
-}
-
 function setStatus(text, cls) {
   const el = document.getElementById('status-msg');
   el.textContent = text;
   el.className = 'status-badge' + (cls ? ' ' + cls : '');
-  if (cls === 'saved') {
-    setTimeout(() => {
-      if (document.getElementById('status-msg').textContent === text) setStatus('準備就緒');
-    }, 2000);
-  }
 }
 
 function setPlayBtn(isPlaying) {
@@ -614,20 +603,13 @@ function setPlayBtn(isPlaying) {
   bp.className = 'btn-play' + (isPlaying ? '' : ' paused');
 }
 
-function getPauseDuration(prevRole, nextRole) {
-  const dialogPause = parseInt(document.getElementById('pause-dialog').value, 10);
-  const narratorPause = parseInt(document.getElementById('pause-narrator').value, 10);
-  if (prevRole === 'T' || nextRole === 'T') return narratorPause;
-  return dialogPause;
-}
-
 async function speakLine(idx) {
   if (stopReq || idx >= lines.length) { finish(); return; }
   curIdx = idx;
   const l = lines[idx];
   renderDialogue(idx);
   document.getElementById('line-cur').textContent = idx + 1;
-  document.getElementById('prog-fill').style.width = Math.round(((idx) / lines.length) * 100) + '%';
+  document.getElementById('prog-fill').style.width = Math.round((idx / lines.length) * 100) + '%';
 
   const roleKey = l.role === 'A' ? 'a' : l.role === 'B' ? 'b' : 't';
   const vIdx = parseInt(document.getElementById('voice-' + roleKey).value);
@@ -637,143 +619,72 @@ async function speakLine(idx) {
     const u = new SpeechSynthesisUtterance(l.text);
     u.rate = rate;
     if (!isNaN(vIdx) && allVoices[vIdx]) u.voice = allVoices[vIdx];
-    u.onend = res;
-    u.onerror = () => res();
+    u.onend = res; u.onerror = res;
     synth.speak(u);
   });
 
   if (stopReq) { finish(); return; }
-  const nextIdx = idx + 1;
-  if (nextIdx < lines.length) {
-    const pauseMs = getPauseDuration(l.role, lines[nextIdx].role);
-    if (pauseMs > 0) await new Promise(r => setTimeout(r, pauseMs));
+
+  // 自動套用停頓：本行或下一行是旁白 → 用旁白停頓（給學生思考），否則用對話停頓
+  const next = lines[idx + 1];
+  let gapMs;
+  if (next === undefined) {
+    gapMs = 0; // 最後一行不需停頓
+  } else if (l.role === 'T' || next.role === 'T') {
+    gapMs = parseInt(document.getElementById('gap-narr').value);
+  } else {
+    gapMs = parseInt(document.getElementById('gap-dialog').value);
+  }
+  if (gapMs > 0) {
+    // 分段等待，讓「停止」在長停頓中也能立即生效
+    const t0 = Date.now();
+    while (Date.now() - t0 < gapMs) {
+      if (stopReq || !playing) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
   }
   if (stopReq) { finish(); return; }
   if (!stopReq && playing) speakLine(idx + 1);
+}
+
+function fmtGap(v) {
+  const s = parseInt(v) / 1000;
+  return (s % 1 === 0 ? s : s.toFixed(1)) + '秒';
 }
 
 function start() {
   const text = document.getElementById('dialogue-input').value.trim();
   if (!text) { setStatus('請輸入內容'); return; }
   lines = parseLines(text);
-  if (lines.length === 0) { setStatus('沒有有效對話行'); return; }
   document.getElementById('line-total').textContent = lines.length + ' 行';
   playing = true; paused = false; stopReq = false;
   setPlayBtn(true);
   setStatus('朗讀中...', 'playing');
   document.getElementById('prog-fill').style.width = '0%';
-  document.getElementById('line-cur').textContent = '0';
   synth.cancel();
   speakLine(0);
 }
 
 function finish() {
-  if (!stopReq && playing) {
-    playing = false;
-    setPlayBtn(false);
+  playing = false; paused = false;
+  setPlayBtn(false);
+  if (stopReq) {
+    setStatus('已停止');
+  } else {
     setStatus('完成 ✓', 'done');
     document.getElementById('prog-fill').style.width = '100%';
     document.getElementById('line-cur').textContent = lines.length;
-  } else if (stopReq) {
-    playing = false;
-    setPlayBtn(false);
-    setStatus('已停止');
-    document.getElementById('prog-fill').style.width = '0%';
-    document.getElementById('line-cur').textContent = '0';
-  } else {
-    playing = false;
-    setPlayBtn(false);
   }
-  paused = false;
-  stopReq = false;
-}
-
-function getCurrentSettings() {
-  return {
-    version: '1.0',
-    dialogueText: document.getElementById('dialogue-input').value,
-    voiceA: document.getElementById('voice-a').value,
-    voiceB: document.getElementById('voice-b').value,
-    voiceT: document.getElementById('voice-t').value,
-    speedA: document.getElementById('sp-a').value,
-    speedB: document.getElementById('sp-b').value,
-    speedT: document.getElementById('sp-t').value,
-    pauseDialog: document.getElementById('pause-dialog').value,
-    pauseNarrator: document.getElementById('pause-narrator').value
-  };
-}
-
-function loadSettingsFromData(s, showMsg = true) {
-  try {
-    if (s.dialogueText !== undefined) document.getElementById('dialogue-input').value = s.dialogueText;
-    if (s.voiceA !== undefined && document.getElementById('voice-a').querySelector(`option[value="${s.voiceA}"]`)) 
-      document.getElementById('voice-a').value = s.voiceA;
-    if (s.voiceB !== undefined && document.getElementById('voice-b').querySelector(`option[value="${s.voiceB}"]`)) 
-      document.getElementById('voice-b').value = s.voiceB;
-    if (s.voiceT !== undefined && document.getElementById('voice-t').querySelector(`option[value="${s.voiceT}"]`)) 
-      document.getElementById('voice-t').value = s.voiceT;
-    if (s.speedA !== undefined) document.getElementById('sp-a').value = s.speedA;
-    if (s.speedB !== undefined) document.getElementById('sp-b').value = s.speedB;
-    if (s.speedT !== undefined) document.getElementById('sp-t').value = s.speedT;
-    if (s.pauseDialog !== undefined) document.getElementById('pause-dialog').value = s.pauseDialog;
-    if (s.pauseNarrator !== undefined) document.getElementById('pause-narrator').value = s.pauseNarrator;
-    
-    document.getElementById('spv-a').textContent = parseFloat(document.getElementById('sp-a').value).toFixed(2)+'×';
-    document.getElementById('spv-b').textContent = parseFloat(document.getElementById('sp-b').value).toFixed(2)+'×';
-    document.getElementById('spv-t').textContent = parseFloat(document.getElementById('sp-t').value).toFixed(2)+'×';
-    document.getElementById('dialog-pause-val').textContent = document.getElementById('pause-dialog').value + 'ms';
-    document.getElementById('narrator-pause-val').textContent = document.getElementById('pause-narrator').value + 'ms';
-    
-    if (showMsg) setStatus('✓ 設定已載入', 'saved');
-    return true;
-  } catch(e) { return false; }
-}
-
-function saveToLocal() {
-  const settings = getCurrentSettings();
-  localStorage.setItem('tts_settings', JSON.stringify(settings));
-  setStatus('✓ 已儲存到本機', 'saved');
-}
-
-function exportSettings() {
-  const settings = getCurrentSettings();
-  const jsonStr = JSON.stringify(settings, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `tts_settings_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  setStatus('✓ 設定檔已匯出', 'saved');
-}
-
-function importSettings(file) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const settings = JSON.parse(e.target.result);
-      if (loadSettingsFromData(settings, true)) {
-        localStorage.setItem('tts_settings', JSON.stringify(settings));
-      }
-    } catch(err) {
-      setStatus('❌ 檔案格式錯誤', '');
-    }
-  };
-  reader.onerror = () => setStatus('❌ 讀取失敗', '');
-  reader.readAsText(file);
 }
 
 document.getElementById('btn-play').addEventListener('click', () => {
   if (!synth) return;
   if (!playing && !paused) { start(); return; }
-  if (playing && !paused) {
+  if (playing) {
     synth.pause(); playing = false; paused = true;
     setPlayBtn(false);
     setStatus('已暫停', 'paused');
-  } else if (!playing && paused) {
+  } else {
     synth.resume(); paused = false; playing = true;
     setPlayBtn(true);
     setStatus('朗讀中...', 'playing');
@@ -782,13 +693,12 @@ document.getElementById('btn-play').addEventListener('click', () => {
 
 document.getElementById('btn-stop').addEventListener('click', () => {
   stopReq = true; playing = false; paused = false;
-  if (synth) synth.cancel();
+  synth.cancel();
   setPlayBtn(false);
   setStatus('已停止');
   document.getElementById('prog-fill').style.width = '0%';
   document.getElementById('line-cur').textContent = '0';
   document.getElementById('dialogue-box').classList.remove('visible');
-  setTimeout(() => { stopReq = false; }, 50);
 });
 
 document.getElementById('btn-clear').addEventListener('click', () => {
@@ -799,7 +709,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   document.getElementById('line-cur').textContent = '0';
   document.getElementById('line-total').textContent = '0 行';
   setStatus('準備就緒');
-  playing = false; paused = false; stopReq = false;
+  playing = false; paused = false;
   setPlayBtn(false);
 });
 
@@ -807,36 +717,141 @@ document.getElementById('btn-demo').addEventListener('click', () => {
   document.getElementById('dialogue-input').value = DEMO;
 });
 
-document.getElementById('btn-save').addEventListener('click', saveToLocal);
-document.getElementById('btn-export').addEventListener('click', exportSettings);
-document.getElementById('btn-import').addEventListener('click', () => {
-  document.getElementById('file-import').click();
+/* ===== 設定檔功能 ===== */
+const LS_KEY = 'tts-dialog-settings';
+
+function collectSettings() {
+  const voiceName = r => {
+    const sel = document.getElementById('voice-' + r);
+    const v = allVoices[parseInt(sel.value)];
+    return v ? { name: v.name, lang: v.lang } : null;
+  };
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    text: document.getElementById('dialogue-input').value,
+    voices: { a: voiceName('a'), b: voiceName('b'), t: voiceName('t') },
+    speeds: {
+      a: document.getElementById('sp-a').value,
+      b: document.getElementById('sp-b').value,
+      t: document.getElementById('sp-t').value
+    },
+    gaps: {
+      dialog: document.getElementById('gap-dialog').value,
+      narr: document.getElementById('gap-narr').value
+    }
+  };
+}
+
+function setSlider(id, labelId, val, fmt) {
+  const el = document.getElementById(id);
+  if (val === undefined || val === null) return;
+  el.value = val;
+  document.getElementById(labelId).textContent = fmt(el.value);
+}
+
+function applyVoiceByName(role, saved) {
+  if (!saved) return;
+  const sel = document.getElementById('voice-' + role);
+  // 先比對「名稱＋語言」完全相同，再退而求其次只比對名稱
+  let idx = allVoices.findIndex(v => v.name === saved.name && v.lang === saved.lang);
+  if (idx === -1) idx = allVoices.findIndex(v => v.name === saved.name);
+  if (idx === -1) return; // 此設備沒有這個聲音，保持預設
+  for (const opt of sel.options) {
+    if (parseInt(opt.value) === idx) { sel.value = opt.value; break; }
+  }
+}
+
+function applyPendingVoices() {
+  if (!pendingVoices) return;
+  ['a','b','t'].forEach(r => applyVoiceByName(r, pendingVoices[r]));
+  pendingVoices = null;
+}
+
+function applySettings(s) {
+  if (!s || typeof s !== 'object') return false;
+  if (typeof s.text === 'string') document.getElementById('dialogue-input').value = s.text;
+  const sp = s.speeds || {};
+  const spFmt = v => parseFloat(v).toFixed(2) + '×';
+  setSlider('sp-a', 'spv-a', sp.a, spFmt);
+  setSlider('sp-b', 'spv-b', sp.b, spFmt);
+  setSlider('sp-t', 'spv-t', sp.t, spFmt);
+  const g = s.gaps || {};
+  setSlider('gap-dialog', 'gap-dialog-val', g.dialog, fmtGap);
+  setSlider('gap-narr', 'gap-narr-val', g.narr, fmtGap);
+  if (s.voices) {
+    if (allVoices.length) {
+      ['a','b','t'].forEach(r => applyVoiceByName(r, s.voices[r]));
+    } else {
+      pendingVoices = s.voices; // 聲音還沒載入，等 populateAll 後再套用
+    }
+  }
+  return true;
+}
+
+function noteMsg(msg) {
+  const el = document.getElementById('save-note');
+  el.textContent = msg;
+  setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 4000);
+}
+
+// 💾 匯出設定檔
+document.getElementById('btn-export').addEventListener('click', () => {
+  const data = JSON.stringify(collectSettings(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  const d = new Date();
+  const stamp = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  a.href = URL.createObjectURL(blob);
+  a.download = '聽力設定_' + stamp + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  noteMsg('💾 已匯出設定檔（在「下載」或「檔案」中）');
 });
-document.getElementById('file-import').addEventListener('change', (e) => {
-  if (e.target.files.length > 0) {
-    importSettings(e.target.files[0]);
-    e.target.value = '';
+
+// 📂 匯入設定檔
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const ok = applySettings(JSON.parse(reader.result));
+      noteMsg(ok ? '📂 設定已還原 ✓' : '⚠️ 檔案格式不正確');
+    } catch {
+      noteMsg('⚠️ 無法讀取，請確認是本工具匯出的設定檔');
+    }
+    e.target.value = ''; // 允許重複選同一個檔
+  };
+  reader.readAsText(f);
+});
+
+// 🏠 本機儲存
+document.getElementById('btn-localsave').addEventListener('click', () => {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(collectSettings()));
+    noteMsg('🏠 已儲存到這台設備，下次打開自動還原 ✓');
+  } catch {
+    noteMsg('⚠️ 此瀏覽器無法本機儲存（可能是無痕模式）');
   }
 });
 
-const dialogSlider = document.getElementById('pause-dialog');
-const narratorSlider = document.getElementById('pause-narrator');
-const dialogVal = document.getElementById('dialog-pause-val');
-const narratorVal = document.getElementById('narrator-pause-val');
-dialogSlider.addEventListener('input', () => { dialogVal.textContent = dialogSlider.value + 'ms'; });
-narratorSlider.addEventListener('input', () => { narratorVal.textContent = narratorSlider.value + 'ms'; });
-dialogVal.textContent = dialogSlider.value + 'ms';
-narratorVal.textContent = narratorSlider.value + 'ms';
-
-document.getElementById('sp-a').addEventListener('input', function() {
-  document.getElementById('spv-a').textContent = parseFloat(this.value).toFixed(2)+'×';
-});
-document.getElementById('sp-b').addEventListener('input', function() {
-  document.getElementById('spv-b').textContent = parseFloat(this.value).toFixed(2)+'×';
-});
-document.getElementById('sp-t').addEventListener('input', function() {
-  document.getElementById('spv-t').textContent = parseFloat(this.value).toFixed(2)+'×';
-});
+// 開啟時自動還原本機儲存的設定
+(function autoRestore() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    applySettings(s);
+    const t = s.savedAt ? new Date(s.savedAt) : null;
+    noteMsg('🏠 已自動還原上次儲存的設定' + (t ? '（' + t.toLocaleDateString('zh-TW') + '）' : ''));
+  } catch { /* 忽略損壞的儲存資料 */ }
+})();
 </script>
 </body>
 </html>
