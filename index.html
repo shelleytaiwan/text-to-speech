@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-<title>文字轉語音 - 支援 iPhone/iPad (含男聲)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>文字轉語音工具 - 對話+旁白 | 匯出/匯入設定</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap');
 
@@ -28,6 +28,8 @@
     --accent: #2563EB;
     --radius: 10px;
     --radius-sm: 6px;
+    --success: #10B981;
+    --success-bg: #D1FAE5;
   }
 
   body {
@@ -43,8 +45,8 @@
     margin: 0 auto;
   }
 
-  header { margin-bottom: 1.75rem; }
-  header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  header { margin-bottom: 1.5rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
   header p { font-size: 14px; color: var(--text2); }
 
   .hint-box {
@@ -85,8 +87,10 @@
     font-size: 15px;
     line-height: 1.75;
     font-family: 'Noto Sans TC', sans-serif;
+    color: var(--text);
     background: var(--surface);
     outline: none;
+    transition: border-color 0.15s;
   }
   textarea:focus { border-color: var(--accent); }
 
@@ -136,6 +140,7 @@
     outline: none;
     cursor: pointer;
   }
+  select:focus { border-color: var(--accent); }
 
   .speed-row {
     display: flex;
@@ -145,7 +150,7 @@
   }
   .speed-row label { font-size: 12px; color: var(--text2); white-space: nowrap; }
   .speed-row input[type=range] { flex: 1; accent-color: var(--accent); }
-  .spv { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; }
+  .spv { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; color: var(--text); }
 
   .preview-btn {
     width: 100%;
@@ -155,23 +160,47 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--surface2);
+    color: var(--text2);
     cursor: pointer;
-    font-family: inherit;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: background 0.15s, color 0.15s;
   }
-  .preview-btn:hover { background: var(--border); }
+  .preview-btn:hover { background: var(--border); color: var(--text); }
 
-  .gap-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1rem;
+  .pause-panel {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 12px 16px;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
-  .gap-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
-  .gap-row input[type=range] { flex: 1; }
+  .pause-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .pause-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 130px;
+  }
+  .pause-item input[type=range] {
+    flex: 1;
+    min-width: 140px;
+    accent-color: var(--accent);
+  }
+  .pause-val {
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 55px;
+    text-align: right;
+    color: var(--text);
+  }
 
   .playback-bar {
     display: flex;
@@ -182,7 +211,6 @@
     border-radius: var(--radius);
     padding: 14px 18px;
     margin-bottom: 1rem;
-    flex-wrap: wrap;
   }
 
   .btn-play {
@@ -193,30 +221,30 @@
     color: #fff;
     font-size: 18px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    transition: 0.1s;
+    transition: background 0.15s, transform 0.1s;
     box-shadow: 0 2px 8px rgba(37,99,235,0.25);
   }
   .btn-play:hover { background: #1D4ED8; }
   .btn-play:active { transform: scale(0.95); }
-  .btn-play.paused { background: #6B7280; }
+  .btn-play.paused { background: #6B7280; box-shadow: none; }
 
   .btn-stop {
     width: 36px; height: 36px;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--surface2);
+    color: var(--text2);
     font-size: 13px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
   }
+  .btn-stop:hover { background: var(--border); }
 
-  .progress-wrap { flex: 1; min-width: 120px; }
+  .progress-wrap { flex: 1; }
   .progress-bg {
     height: 5px;
     background: var(--surface2);
@@ -249,6 +277,7 @@
   .status-badge.playing { background: #DCFCE7; color: #15803D; }
   .status-badge.paused { background: #FEF3C7; color: #92400E; }
   .status-badge.done { background: var(--blue-bg); color: #1D4ED8; }
+  .status-badge.saved { background: var(--success-bg); color: #047857; }
 
   .dialogue-box {
     display: none;
@@ -257,6 +286,7 @@
     margin-bottom: 1rem;
     max-height: 280px;
     overflow-y: auto;
+    padding-right: 2px;
   }
   .dialogue-box.visible { display: flex; }
 
@@ -268,6 +298,7 @@
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
+    transition: background 0.2s, border-color 0.2s;
   }
   .dline.act-a { background: var(--blue-bg); border-color: var(--blue-border); }
   .dline.act-b { background: var(--green-bg); border-color: var(--green-border); }
@@ -276,30 +307,55 @@
   .avatar {
     width: 30px; height: 30px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
     flex-shrink: 0;
   }
   .av-a { background: var(--blue-border); color: #1D4ED8; }
   .av-b { background: var(--green-border); color: #15803D; }
   .av-t { background: var(--amber-border); color: #92400E; }
 
-  .line-text { font-size: 15px; line-height: 1.7; padding-top: 4px; }
+  .line-text { font-size: 15px; line-height: 1.7; color: var(--text); padding-top: 4px; }
 
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
   .btn-sec {
     font-size: 13px;
-    padding: 8px 16px;
+    padding: 8px 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--surface);
+    color: var(--text);
     cursor: pointer;
-    font-family: inherit;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: background 0.15s;
   }
   .btn-sec:hover { background: var(--surface2); }
+  .btn-export {
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+    color: #1D4ED8;
+  }
+  .btn-export:hover { background: #DBEAFE; }
+  .btn-import {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+    color: #B45309;
+  }
+  .btn-import:hover { background: #FEF3C7; }
+  .btn-save {
+    background: var(--success-bg);
+    border-color: #A7F3D0;
+    color: #047857;
+  }
+
+  .file-input-hidden {
+    display: none;
+  }
 
   .no-support {
     background: #FEF2F2;
@@ -307,15 +363,18 @@
     color: #DC2626;
     border-radius: var(--radius-sm);
     padding: 12px 14px;
+    font-size: 13px;
     margin-bottom: 1rem;
     display: none;
   }
 
   footer {
-    margin-top: 2rem;
+    margin-top: 1rem;
     text-align: center;
     font-size: 12px;
     color: var(--text2);
+    padding: 8px;
+    border-top: 1px solid var(--border);
   }
 </style>
 </head>
@@ -323,21 +382,23 @@
 <div class="container">
   <header>
     <h1>🎧 文字轉語音工具</h1>
-    <p>A、B 對話 ＋ 旁白 · 支援 iPhone/iPad 中文男聲</p>
+    <p>A、B 對話 ＋ 旁白 · 獨立停頓</p>
   </header>
 
-  <div id="no-support" class="no-support">⚠️ 此瀏覽器不支援語音朗讀</div>
+  <div id="no-support" class="no-support">
+    ⚠️ 此瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。
+  </div>
 
   <div class="hint-box">
-    📌 格式說明：<br>
-    <strong>A：</strong> 開頭 → A 角色朗讀<br>
-    <strong>B：</strong> 開頭 → B 角色朗讀<br>
-    其他行 → 旁白朗讀
+    📌 <strong>格式說明</strong>：<strong>A：</strong> / <strong>B：</strong> 開頭 → 角色朗讀；其他行 → 旁白朗讀<br>
+    💾 <strong>匯出設定檔</strong>：儲存目前所有設定（文字、語音、速度、停頓）<br>
+    📂 <strong>匯入設定檔</strong>：讀取設定檔，一秒還原<br>
+    🏠 <strong>本機儲存</strong>：儲存在這台設備，下次打開自動還原
   </div>
 
   <div class="card">
     <div class="card-title">對話內容</div>
-    <textarea id="dialogue-input" placeholder="A：一件300。&#10;B：有打折嗎？&#10;A：抱歉，沒有。"></textarea>
+    <textarea id="dialogue-input" placeholder="聽男女對話，回答問題。&#10;A：一件300。&#10;B：有打折嗎？&#10;A：抱歉，沒有。&#10;請問男的想買什麼？"></textarea>
   </div>
 
   <div class="voice-grid">
@@ -376,19 +437,30 @@
     </div>
   </div>
 
-  <div class="gap-row">
-    <label>換場停頓</label>
-    <input type="range" id="gap-dur" min="200" max="1500" step="100" value="700"
-      oninput="document.getElementById('gap-val').textContent=this.value+'ms'">
-    <span class="spv" id="gap-val">700ms</span>
+  <div class="pause-panel">
+    <div class="pause-item">
+      <span class="pause-label">對話間停頓 (A↔B)</span>
+      <input type="range" id="pause-dialog" min="300" max="1500" step="50" value="900">
+      <span class="pause-val" id="dialog-pause-val">900ms</span>
+    </div>
+    <div class="pause-item">
+      <span class="pause-label">旁白停頓 (旁白前後)</span>
+      <input type="range" id="pause-narrator" min="500" max="2500" step="50" value="1400">
+      <span class="pause-val" id="narrator-pause-val">1400ms</span>
+    </div>
   </div>
 
   <div class="playback-bar">
-    <button class="btn-play" id="btn-play">▶</button>
-    <button class="btn-stop" id="btn-stop">■</button>
+    <button class="btn-play" id="btn-play" title="播放 / 暫停">▶</button>
+    <button class="btn-stop" id="btn-stop" title="停止">■</button>
     <div class="progress-wrap">
-      <div class="progress-bg"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
-      <div class="prog-labels"><span id="line-cur">0</span><span id="line-total">0 行</span></div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+      <div class="prog-labels">
+        <span id="line-cur">0</span>
+        <span id="line-total">0 行</span>
+      </div>
     </div>
     <span class="status-badge" id="status-msg">準備就緒</span>
   </div>
@@ -398,263 +470,373 @@
   <div class="btn-row">
     <button class="btn-sec" id="btn-clear">🗑 清除</button>
     <button class="btn-sec" id="btn-demo">📄 載入示範</button>
+    <button class="btn-sec btn-save" id="btn-save">💾 本機儲存</button>
+    <button class="btn-sec btn-export" id="btn-export">📤 匯出設定檔</button>
+    <button class="btn-sec btn-import" id="btn-import">📥 匯入設定檔</button>
   </div>
 
-  <footer>可用螢幕錄影 · 已開啟 iPhone/iPad 男聲支援</footer>
+  <input type="file" id="file-import" class="file-input-hidden" accept=".json" />
+
+  <footer>📁 匯出設定檔可保存或傳給學生 · 本機儲存會自動記住</footer>
 </div>
 
 <script>
-(function(){
-  const synth = window.speechSynthesis;
-  if (!synth) {
-    document.getElementById('no-support').style.display = 'block';
-    return;
-  }
+const synth = window.speechSynthesis;
+if (!synth) document.getElementById('no-support').style.display = 'block';
 
-  let allVoices = [];
-  let lines = [], curIdx = 0, playing = false, paused = false, stopReq = false;
+let allVoices = [];
+let lines = [], curIdx = 0, playing = false, paused = false, stopReq = false;
 
-  // ----- 關鍵修改：支援 iOS 男聲，只移除粵語/Shelley/Sandy，不再過度過濾 -----
-  function isUsableVoice(voice) {
-    const lang = voice.lang.toLowerCase();
-    if (!lang.startsWith('zh')) return false;
-    const nameLower = (voice.name + ' ' + voice.lang).toLowerCase();
-    // 只移除明確的粵語、香港、Shelley、Sandy
-    if (nameLower.includes('yue') || nameLower.includes('hk') || nameLower.includes('hongkong')) return false;
-    if (nameLower.includes('cantonese')) return false;
-    if (nameLower.includes('shelley')) return false;
-    if (nameLower.includes('sandy')) return false;
-    return true;
-  }
+const BLOCKED = ['grandma','grandpa','flo','sandy','shelley','eddy','zh-hk','yue','cantonese'];
 
-  function getVoiceDisplayName(voice) {
-    let name = voice.name;
-    let langTag = voice.lang;
-    let label = `${name} (${langTag})`;
-    let lower = name.toLowerCase();
-    
-    // 辨識男聲標記 (讓使用者容易找到)
-    if (lower.includes('male') || lower.includes('man') || lower.includes('男生') || 
-        (lower.includes('ting-ting') === false && lower.includes('yating') === false && 
-         lower.includes('hanhan') === false && lower.includes('lulu') === false && 
-         lower.includes('xiaoxiao') === false && lower.includes('yunxi') === false &&
-         lower.includes('yaoyao') === false && lower.includes('female') === false)) {
-      // 簡單啟發：如果名稱不包含典型女聲關鍵字，且包含某些男性特徵，就標記為男聲
-      if (lower.includes('google') && lower.includes('mandarin')) {
-        // Google 普通話預設可能是女聲，不強標
-      } else if (lower.includes('wang') || lower.includes('yunyang') || lower.includes('xiaobei') || 
-                 lower.includes('yunjian') || lower.includes('kangkang')) {
-        label = '👨 男聲 · ' + label;
-      } else if (lower.includes('male')) {
-        label = '👨 男聲 · ' + label;
-      } else if (!lower.includes('female') && !lower.includes('女')) {
-        // 不確定的保留原樣，不要亂標
-      }
+const DEMO = `聽男女對話，回答問題。
+A：歡迎光臨，看看哦！
+B：你好，請問有台灣特色的T恤嗎？
+A：有，您自己穿還是送人呢？
+B：送人。
+A：好的，這是今年的新款，您覺得怎麼樣？
+B：這件太紅了。
+A：我們有5種顏色。
+B：多少錢？
+A：一件300。
+B：有打折嗎？
+A：抱歉，沒有。
+B：我多買幾件，可以打折嗎？
+A：可以，買5送1。
+B：那，黑、黃、藍各兩件。
+請問男的最後買了幾件？`;
+
+function isBlocked(v) {
+  const k = (v.name + ' ' + v.lang).toLowerCase();
+  return BLOCKED.some(b => k.includes(b));
+}
+
+function getPool() {
+  const zh = allVoices.filter(v =>
+    (v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-CN')) && !isBlocked(v)
+  );
+  return zh.length ? zh : allVoices.filter(v => !isBlocked(v));
+}
+
+function populateAll() {
+  const pool = getPool();
+  const opts = pool.map(v =>
+    `<option value="${allVoices.indexOf(v)}">${v.name} (${v.lang})</option>`
+  ).join('');
+  ['a','b','t'].forEach(r => {
+    const select = document.getElementById('voice-' + r);
+    select.innerHTML = opts || '<option>（無語音）</option>';
+  });
+  if (pool.length >= 2) document.getElementById('voice-b').selectedIndex = 1;
+  if (pool.length >= 3) document.getElementById('voice-t').selectedIndex = 2;
+}
+
+function loadVoices() {
+  allVoices = synth.getVoices();
+  if (!allVoices.length) return;
+  populateAll();
+  setTimeout(() => { 
+    const saved = localStorage.getItem('tts_settings');
+    if (saved) {
+      try {
+        loadSettingsFromData(JSON.parse(saved), false);
+      } catch(e) {}
     }
-    
-    // 常見女聲標記
-    if (lower.includes('tingting') || lower.includes('yating') || lower.includes('hanhan') || 
-        lower.includes('lulu') || lower.includes('xiaoxiao') || lower.includes('yunxi') || 
-        lower.includes('yaoyao') || lower.includes('female')) {
-      if (!label.includes('👩')) label = '👩 女聲 · ' + label;
-    }
-    
-    return label;
-  }
+  }, 100);
+}
+if (synth) { synth.onvoiceschanged = loadVoices; loadVoices(); }
 
-  function getAvailableVoices() {
-    let usable = allVoices.filter(isUsableVoice);
-    if (usable.length === 0) {
-      // 非常寬容：只過濾最低限度
-      usable = allVoices.filter(v => v.lang.startsWith('zh') && 
-        !v.name.toLowerCase().includes('yue') && 
-        !v.name.toLowerCase().includes('shelley') &&
-        !v.name.toLowerCase().includes('sandy'));
-    }
-    return usable;
-  }
+const previewText = {
+  a: '你好，我是A角色，很高興認識你。',
+  b: '你好，我是B角色，很高興認識你。',
+  t: '同學，請注意聽，現在開始題目。'
+};
 
-  function populateVoiceSelects() {
-    const voices = getAvailableVoices();
-    if (!voices.length) {
-      const msg = '<option>⚠️ 無中文語音</option>';
-      ['a','b','t'].forEach(r => document.getElementById('voice-'+r).innerHTML = msg);
-      return;
-    }
-    
-    const options = voices.map((v, idx) => `<option value="${idx}">${getVoiceDisplayName(v)}</option>`).join('');
-    ['a','b','t'].forEach(r => document.getElementById('voice-'+r).innerHTML = options);
-    
-    // 智慧預設：A 選第一個女聲，B 選第一個男聲，旁白選中性
-    let femaleIdx = voices.findIndex(v => /female|tingting|yating|hanhan|lulu|xiaoxiao|yunxi|yaoyao|女/i.test(v.name));
-    let maleIdx = voices.findIndex(v => /male|yunyang|xiaobei|yunjian|wang|kangkang|男/i.test(v.name));
-    
-    if (femaleIdx !== -1) document.getElementById('voice-a').selectedIndex = femaleIdx;
-    if (maleIdx !== -1) document.getElementById('voice-b').selectedIndex = maleIdx;
-    
-    // 旁白預設選第三個或第二個
-    if (voices.length > 2) {
-      let tIdx = 2;
-      if (tIdx === femaleIdx || tIdx === maleIdx) tIdx = (tIdx+1) % voices.length;
-      document.getElementById('voice-t').selectedIndex = tIdx;
-    } else if (voices.length === 2) {
-      document.getElementById('voice-t').selectedIndex = 1;
-    }
-  }
+function preview(role) {
+  if (!synth) return;
+  synth.cancel();
+  const vIdx = parseInt(document.getElementById('voice-' + role).value);
+  const rate = parseFloat(document.getElementById('sp-' + role).value);
+  const u = new SpeechSynthesisUtterance(previewText[role]);
+  u.rate = rate;
+  if (!isNaN(vIdx) && allVoices[vIdx]) u.voice = allVoices[vIdx];
+  synth.speak(u);
+}
 
-  function loadVoices() {
-    allVoices = synth.getVoices();
-    if (!allVoices.length) {
-      setTimeout(loadVoices, 100);
-      return;
-    }
-    populateVoiceSelects();
-  }
-  
-  if (synth) {
-    if (synth.getVoices().length) loadVoices();
-    synth.onvoiceschanged = loadVoices;
-    loadVoices();
-  }
+function parseLines(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^([AB])[：:]\s*(.+)/i);
+    if (m) return { role: m[1].toUpperCase(), text: m[2].trim() };
+    return { role: 'T', text: l };
+  });
+}
 
-  function preview(role) {
-    if (!synth) return;
-    synth.cancel();
-    const voices = getAvailableVoices();
-    const idx = parseInt(document.getElementById('voice-'+role).value);
-    const rate = parseFloat(document.getElementById('sp-'+role).value);
-    const text = { a:'你好，我是A角色。', b:'你好，我是B角色。', t:'這是旁白聲音。' }[role];
-    const u = new SpeechSynthesisUtterance(text);
+function actClass(r) { return r==='A'?'act-a':r==='B'?'act-b':'act-t'; }
+function avClass(r) { return r==='A'?'av-a':r==='B'?'av-b':'av-t'; }
+function avLabel(r) { return r==='A'?'A':r==='B'?'B':'師'; }
+
+function renderDialogue(activeIdx) {
+  const box = document.getElementById('dialogue-box');
+  box.classList.add('visible');
+  box.innerHTML = lines.map((l, i) =>
+    `<div class="dline ${i===activeIdx ? actClass(l.role) : ''}" id="dl-${i}">
+      <div class="avatar ${avClass(l.role)}">${avLabel(l.role)}</div>
+      <div class="line-text">${escapeHtml(l.text)}</div>
+    </div>`
+  ).join('');
+  const el = document.getElementById('dl-' + activeIdx);
+  if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+function setStatus(text, cls) {
+  const el = document.getElementById('status-msg');
+  el.textContent = text;
+  el.className = 'status-badge' + (cls ? ' ' + cls : '');
+  if (cls === 'saved') {
+    setTimeout(() => {
+      if (document.getElementById('status-msg').textContent === text) setStatus('準備就緒');
+    }, 2000);
+  }
+}
+
+function setPlayBtn(isPlaying) {
+  const bp = document.getElementById('btn-play');
+  bp.innerHTML = isPlaying ? '⏸' : '▶';
+  bp.className = 'btn-play' + (isPlaying ? '' : ' paused');
+}
+
+function getPauseDuration(prevRole, nextRole) {
+  const dialogPause = parseInt(document.getElementById('pause-dialog').value, 10);
+  const narratorPause = parseInt(document.getElementById('pause-narrator').value, 10);
+  if (prevRole === 'T' || nextRole === 'T') return narratorPause;
+  return dialogPause;
+}
+
+async function speakLine(idx) {
+  if (stopReq || idx >= lines.length) { finish(); return; }
+  curIdx = idx;
+  const l = lines[idx];
+  renderDialogue(idx);
+  document.getElementById('line-cur').textContent = idx + 1;
+  document.getElementById('prog-fill').style.width = Math.round(((idx) / lines.length) * 100) + '%';
+
+  const roleKey = l.role === 'A' ? 'a' : l.role === 'B' ? 'b' : 't';
+  const vIdx = parseInt(document.getElementById('voice-' + roleKey).value);
+  const rate = parseFloat(document.getElementById('sp-' + roleKey).value);
+
+  await new Promise(res => {
+    const u = new SpeechSynthesisUtterance(l.text);
     u.rate = rate;
-    if (!isNaN(idx) && voices[idx]) u.voice = voices[idx];
+    if (!isNaN(vIdx) && allVoices[vIdx]) u.voice = allVoices[vIdx];
+    u.onend = res;
+    u.onerror = () => res();
     synth.speak(u);
-  }
-  window.preview = preview;
+  });
 
-  function parseLines(txt) {
-    return txt.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
-      let m = l.match(/^([AB])[：:]\s*(.+)/i);
-      if(m) return { role: m[1].toUpperCase(), text: m[2].trim() };
-      return { role: 'T', text: l };
-    });
+  if (stopReq) { finish(); return; }
+  const nextIdx = idx + 1;
+  if (nextIdx < lines.length) {
+    const pauseMs = getPauseDuration(l.role, lines[nextIdx].role);
+    if (pauseMs > 0) await new Promise(r => setTimeout(r, pauseMs));
   }
+  if (stopReq) { finish(); return; }
+  if (!stopReq && playing) speakLine(idx + 1);
+}
 
-  function escapeHtml(str) {
-    return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m] || m));
-  }
-  
-  function renderDialogue(active) {
-    let box = document.getElementById('dialogue-box');
-    box.classList.add('visible');
-    box.innerHTML = lines.map((l,i)=>`
-      <div class="dline ${i===active ? (l.role==='A'?'act-a':l.role==='B'?'act-b':'act-t') : ''}" id="dl-${i}">
-        <div class="avatar ${l.role==='A'?'av-a':l.role==='B'?'av-b':'av-t'}">${l.role==='A'?'A':l.role==='B'?'B':'師'}</div>
-        <div class="line-text">${escapeHtml(l.text)}</div>
-      </div>
-    `).join('');
-    let el = document.getElementById('dl-'+active);
-    if(el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }
+function start() {
+  const text = document.getElementById('dialogue-input').value.trim();
+  if (!text) { setStatus('請輸入內容'); return; }
+  lines = parseLines(text);
+  if (lines.length === 0) { setStatus('沒有有效對話行'); return; }
+  document.getElementById('line-total').textContent = lines.length + ' 行';
+  playing = true; paused = false; stopReq = false;
+  setPlayBtn(true);
+  setStatus('朗讀中...', 'playing');
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('line-cur').textContent = '0';
+  synth.cancel();
+  speakLine(0);
+}
 
-  function setStatus(txt, cls) {
-    let el = document.getElementById('status-msg');
-    el.textContent = txt;
-    el.className = 'status-badge' + (cls ? ' '+cls : '');
-  }
-  function setPlayBtn(isp) {
-    let btn = document.getElementById('btn-play');
-    btn.innerHTML = isp ? '⏸' : '▶';
-    btn.className = 'btn-play' + (isp ? '' : ' paused');
-  }
-
-  async function speakLine(idx) {
-    if(stopReq || idx>=lines.length) { finish(); return; }
-    curIdx = idx;
-    renderDialogue(idx);
-    document.getElementById('line-cur').innerText = idx+1;
-    document.getElementById('prog-fill').style.width = Math.round((idx/lines.length)*100)+'%';
-    let l = lines[idx];
-    let roleKey = l.role==='A' ? 'a' : (l.role==='B' ? 'b' : 't');
-    let voices = getAvailableVoices();
-    let selIdx = parseInt(document.getElementById('voice-'+roleKey).value);
-    let rate = parseFloat(document.getElementById('sp-'+roleKey).value);
-    let targetVoice = (!isNaN(selIdx) && voices[selIdx]) ? voices[selIdx] : null;
-    await new Promise(res=>{
-      let u = new SpeechSynthesisUtterance(l.text);
-      u.rate = rate;
-      if(targetVoice) u.voice = targetVoice;
-      u.onend = res;
-      u.onerror = ()=>res();
-      synth.speak(u);
-    });
-    if(stopReq) { finish(); return; }
-    let gap = parseInt(document.getElementById('gap-dur').value);
-    await new Promise(r=>setTimeout(r,gap));
-    if(!stopReq && playing && !paused) speakLine(idx+1);
-  }
-
-  function start() {
-    let text = document.getElementById('dialogue-input').value.trim();
-    if(!text) { setStatus('請輸入內容'); return; }
-    lines = parseLines(text);
-    if(!lines.length) { setStatus('無效行'); return; }
-    document.getElementById('line-total').innerText = lines.length+' 行';
-    playing = true; paused = false; stopReq = false;
-    setPlayBtn(true);
-    setStatus('朗讀中...','playing');
-    document.getElementById('prog-fill').style.width = '0%';
-    if(synth) synth.cancel();
-    speakLine(0);
-  }
-  function finish() {
-    playing = false; paused = false;
+function finish() {
+  if (!stopReq && playing) {
+    playing = false;
     setPlayBtn(false);
-    if(stopReq) {
-      setStatus('已停止');
-      document.getElementById('prog-fill').style.width = '0%';
-      document.getElementById('line-cur').innerText = '0';
-    } else {
-      setStatus('完成 ✓','done');
-      document.getElementById('prog-fill').style.width = '100%';
-      document.getElementById('line-cur').innerText = lines.length;
-    }
-    stopReq = false;
+    setStatus('完成 ✓', 'done');
+    document.getElementById('prog-fill').style.width = '100%';
+    document.getElementById('line-cur').textContent = lines.length;
+  } else if (stopReq) {
+    playing = false;
+    setPlayBtn(false);
+    setStatus('已停止');
+    document.getElementById('prog-fill').style.width = '0%';
+    document.getElementById('line-cur').textContent = '0';
+  } else {
+    playing = false;
+    setPlayBtn(false);
   }
+  paused = false;
+  stopReq = false;
+}
 
-  document.getElementById('btn-play').addEventListener('click',()=>{
-    if(!synth) return;
-    if(!playing && !paused) { start(); return; }
-    if(playing && !paused) {
-      synth.pause(); playing=false; paused=true;
-      setPlayBtn(false); setStatus('已暫停','paused');
-    } else if(paused) {
-      synth.resume(); paused=false; playing=true;
-      setPlayBtn(true); setStatus('朗讀中...','playing');
-      if(!stopReq && lines.length && curIdx<lines.length && !synth.speaking && !synth.pending) speakLine(curIdx);
+function getCurrentSettings() {
+  return {
+    version: '1.0',
+    dialogueText: document.getElementById('dialogue-input').value,
+    voiceA: document.getElementById('voice-a').value,
+    voiceB: document.getElementById('voice-b').value,
+    voiceT: document.getElementById('voice-t').value,
+    speedA: document.getElementById('sp-a').value,
+    speedB: document.getElementById('sp-b').value,
+    speedT: document.getElementById('sp-t').value,
+    pauseDialog: document.getElementById('pause-dialog').value,
+    pauseNarrator: document.getElementById('pause-narrator').value
+  };
+}
+
+function loadSettingsFromData(s, showMsg = true) {
+  try {
+    if (s.dialogueText !== undefined) document.getElementById('dialogue-input').value = s.dialogueText;
+    if (s.voiceA !== undefined && document.getElementById('voice-a').querySelector(`option[value="${s.voiceA}"]`)) 
+      document.getElementById('voice-a').value = s.voiceA;
+    if (s.voiceB !== undefined && document.getElementById('voice-b').querySelector(`option[value="${s.voiceB}"]`)) 
+      document.getElementById('voice-b').value = s.voiceB;
+    if (s.voiceT !== undefined && document.getElementById('voice-t').querySelector(`option[value="${s.voiceT}"]`)) 
+      document.getElementById('voice-t').value = s.voiceT;
+    if (s.speedA !== undefined) document.getElementById('sp-a').value = s.speedA;
+    if (s.speedB !== undefined) document.getElementById('sp-b').value = s.speedB;
+    if (s.speedT !== undefined) document.getElementById('sp-t').value = s.speedT;
+    if (s.pauseDialog !== undefined) document.getElementById('pause-dialog').value = s.pauseDialog;
+    if (s.pauseNarrator !== undefined) document.getElementById('pause-narrator').value = s.pauseNarrator;
+    
+    document.getElementById('spv-a').textContent = parseFloat(document.getElementById('sp-a').value).toFixed(2)+'×';
+    document.getElementById('spv-b').textContent = parseFloat(document.getElementById('sp-b').value).toFixed(2)+'×';
+    document.getElementById('spv-t').textContent = parseFloat(document.getElementById('sp-t').value).toFixed(2)+'×';
+    document.getElementById('dialog-pause-val').textContent = document.getElementById('pause-dialog').value + 'ms';
+    document.getElementById('narrator-pause-val').textContent = document.getElementById('pause-narrator').value + 'ms';
+    
+    if (showMsg) setStatus('✓ 設定已載入', 'saved');
+    return true;
+  } catch(e) { return false; }
+}
+
+function saveToLocal() {
+  const settings = getCurrentSettings();
+  localStorage.setItem('tts_settings', JSON.stringify(settings));
+  setStatus('✓ 已儲存到本機', 'saved');
+}
+
+function exportSettings() {
+  const settings = getCurrentSettings();
+  const jsonStr = JSON.stringify(settings, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tts_settings_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  setStatus('✓ 設定檔已匯出', 'saved');
+}
+
+function importSettings(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const settings = JSON.parse(e.target.result);
+      if (loadSettingsFromData(settings, true)) {
+        localStorage.setItem('tts_settings', JSON.stringify(settings));
+      }
+    } catch(err) {
+      setStatus('❌ 檔案格式錯誤', '');
     }
-  });
-  document.getElementById('btn-stop').addEventListener('click',()=>{
-    stopReq=true; playing=false; paused=false;
-    if(synth) synth.cancel();
-    setPlayBtn(false); setStatus('已停止');
-    document.getElementById('prog-fill').style.width='0%';
-    document.getElementById('line-cur').innerText='0';
-    document.getElementById('dialogue-box').classList.remove('visible');
-  });
-  document.getElementById('btn-clear').addEventListener('click',()=>{
-    stopReq=true; synth&&synth.cancel();
-    document.getElementById('dialogue-input').value='';
-    document.getElementById('dialogue-box').classList.remove('visible');
-    document.getElementById('prog-fill').style.width='0%';
-    document.getElementById('line-cur').innerText='0';
-    document.getElementById('line-total').innerText='0 行';
-    setStatus('準備就緒');
-    playing=false; paused=false; setPlayBtn(false);
-  });
-  document.getElementById('btn-demo').addEventListener('click',()=>{
-    document.getElementById('dialogue-input').value = `聽男女對話，回答問題。\nA：歡迎光臨，看看哦！\nB：你好，請問有台灣特色的T恤嗎？\nA：有，您自己穿還是送人呢？\nB：送人。\nA：好的，這是今年的新款，您覺得怎麼樣？\nB：這件太紅了。\nA：我們有5種顏色。\nB：多少錢？\nA：一件300。\nB：有打折嗎？\nA：抱歉，沒有。\nB：我多買幾件，可以打折嗎？\nA：可以，買5送1。\nB：那，黑、黃、藍各兩件。\n請問男的最後買了幾件？`;
-  });
-})();
+  };
+  reader.onerror = () => setStatus('❌ 讀取失敗', '');
+  reader.readAsText(file);
+}
+
+document.getElementById('btn-play').addEventListener('click', () => {
+  if (!synth) return;
+  if (!playing && !paused) { start(); return; }
+  if (playing && !paused) {
+    synth.pause(); playing = false; paused = true;
+    setPlayBtn(false);
+    setStatus('已暫停', 'paused');
+  } else if (!playing && paused) {
+    synth.resume(); paused = false; playing = true;
+    setPlayBtn(true);
+    setStatus('朗讀中...', 'playing');
+  }
+});
+
+document.getElementById('btn-stop').addEventListener('click', () => {
+  stopReq = true; playing = false; paused = false;
+  if (synth) synth.cancel();
+  setPlayBtn(false);
+  setStatus('已停止');
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('line-cur').textContent = '0';
+  document.getElementById('dialogue-box').classList.remove('visible');
+  setTimeout(() => { stopReq = false; }, 50);
+});
+
+document.getElementById('btn-clear').addEventListener('click', () => {
+  stopReq = true; synth && synth.cancel();
+  document.getElementById('dialogue-input').value = '';
+  document.getElementById('dialogue-box').classList.remove('visible');
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('line-cur').textContent = '0';
+  document.getElementById('line-total').textContent = '0 行';
+  setStatus('準備就緒');
+  playing = false; paused = false; stopReq = false;
+  setPlayBtn(false);
+});
+
+document.getElementById('btn-demo').addEventListener('click', () => {
+  document.getElementById('dialogue-input').value = DEMO;
+});
+
+document.getElementById('btn-save').addEventListener('click', saveToLocal);
+document.getElementById('btn-export').addEventListener('click', exportSettings);
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('file-import').click();
+});
+document.getElementById('file-import').addEventListener('change', (e) => {
+  if (e.target.files.length > 0) {
+    importSettings(e.target.files[0]);
+    e.target.value = '';
+  }
+});
+
+const dialogSlider = document.getElementById('pause-dialog');
+const narratorSlider = document.getElementById('pause-narrator');
+const dialogVal = document.getElementById('dialog-pause-val');
+const narratorVal = document.getElementById('narrator-pause-val');
+dialogSlider.addEventListener('input', () => { dialogVal.textContent = dialogSlider.value + 'ms'; });
+narratorSlider.addEventListener('input', () => { narratorVal.textContent = narratorSlider.value + 'ms'; });
+dialogVal.textContent = dialogSlider.value + 'ms';
+narratorVal.textContent = narratorSlider.value + 'ms';
+
+document.getElementById('sp-a').addEventListener('input', function() {
+  document.getElementById('spv-a').textContent = parseFloat(this.value).toFixed(2)+'×';
+});
+document.getElementById('sp-b').addEventListener('input', function() {
+  document.getElementById('spv-b').textContent = parseFloat(this.value).toFixed(2)+'×';
+});
+document.getElementById('sp-t').addEventListener('input', function() {
+  document.getElementById('spv-t').textContent = parseFloat(this.value).toFixed(2)+'×';
+});
 </script>
 </body>
 </html>
