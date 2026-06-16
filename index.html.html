@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>聽力教材製作工具</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --surface2: #F0EEE9;
+    --border: #E0DDD6;
+    --text: #1A1916;
+    --text2: #6B6860;
+    --blue: #2563EB;
+    --blue-bg: #EFF6FF;
+    --blue-border: #BFDBFE;
+    --green: #16A34A;
+    --green-bg: #F0FDF4;
+    --green-border: #BBF7D0;
+    --amber: #B45309;
+    --amber-bg: #FFFBEB;
+    --amber-border: #FDE68A;
+    --purple: #7C3AED;
+    --purple-bg: #F5F3FF;
+    --purple-border: #DDD6FE;
+    --accent: #2563EB;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 720px; margin: 0 auto; }
+
+  header { margin-bottom: 1.5rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  header p { font-size: 14px; color: var(--text2); }
+
+  /* ── Tab 切換 ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: var(--surface2);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Noto Sans TC', sans-serif;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── 共用卡片 ── */
+  .hint-box {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #1D4ED8;
+    margin-bottom: 1rem;
+    line-height: 1.7;
+  }
+  .hint-box.purple {
+    background: var(--purple-bg);
+    border-color: var(--purple-border);
+    color: #5B21B6;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 15px;
+    line-height: 1.75;
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: var(--accent); }
+
+  /* ── 聲音卡片（對話模式）── */
+  .voice-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 560px) { .voice-grid { grid-template-columns: 1fr; } }
+
+  .voice-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .role-label {
+    font-size: 13px; font-weight: 600; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot-a { background: var(--blue); }
+  .dot-b { background: var(--green); }
+  .dot-t { background: var(--amber); }
+  .col-a { color: var(--blue); }
+  .col-b { color: var(--green); }
+  .col-t { color: var(--amber); }
+
+  select {
+    width: 100%; padding: 7px 10px; font-size: 13px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif; outline: none; cursor: pointer;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .speed-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  }
+  .speed-row label { font-size: 12px; color: var(--text2); white-space: nowrap; }
+  .speed-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .spv { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; color: var(--text); }
+
+  .preview-btn {
+    width: 100%; margin-top: 10px; padding: 5px 0; font-size: 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface2); color: var(--text2); cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif; transition: background 0.15s, color 0.15s;
+  }
+  .preview-btn:hover { background: var(--border); color: var(--text); }
+
+  /* ── 考試模式：停頓設定格子 ── */
+  .pause-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 480px) { .pause-grid { grid-template-columns: 1fr; } }
+
+  .pause-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .pause-card label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 8px; }
+  .pause-card .pval { float: right; font-weight: 600; color: var(--text); }
+  .pause-card input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  /* ── 考試模式：聲音選擇（單行版）── */
+  .exam-voice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 480px) { .exam-voice-grid { grid-template-columns: 1fr; } }
+
+  /* ── 共用停頓列 ── */
+  .gap-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px;
+  }
+  .gap-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+  .gap-row input[type=range] { flex: 1; accent-color: var(--accent); }
+
+  /* ── 播放列 ── */
+  .playback-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 18px; margin-bottom: 1rem;
+  }
+  .btn-play {
+    width: 48px; height: 48px; border-radius: 50%; border: none;
+    background: var(--accent); color: #fff; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
+  .btn-play:hover { background: #1D4ED8; }
+  .btn-play:active { transform: scale(0.95); }
+  .btn-play.paused { background: #6B7280; box-shadow: none; }
+  .btn-stop {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--surface2); color: var(--text2);
+    font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .btn-stop:hover { background: var(--border); }
+  .progress-wrap { flex: 1; }
+  .progress-bg { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+  .prog-labels { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: var(--text2); }
+  .status-badge {
+    font-size: 12px; padding: 4px 10px; border-radius: 99px;
+    background: var(--surface2); color: var(--text2); white-space: nowrap; font-weight: 500;
+  }
+  .status-badge.playing { background: #DCFCE7; color: #15803D; }
+  .status-badge.paused { background: #FEF3C7; color: #92400E; }
+  .status-badge.done { background: var(--blue-bg); color: #1D4ED8; }
+
+  /* ── 對話框顯示 ── */
+  .dialogue-box {
+    display: none; flex-direction: column; gap: 8px; margin-bottom: 1rem;
+    max-height: 280px; overflow-y: auto; padding-right: 2px;
+  }
+  .dialogue-box.visible { display: flex; }
+  .dline {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .dline.act-a { background: var(--blue-bg); border-color: var(--blue-border); }
+  .dline.act-b { background: var(--green-bg); border-color: var(--green-border); }
+  .dline.act-t { background: var(--amber-bg); border-color: var(--amber-border); }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .av-a { background: var(--blue-border); color: #1D4ED8; }
+  .av-b { background: var(--green-border); color: #15803D; }
+  .av-t { background: var(--amber-border); color: #92400E; }
+  .line-text { font-size: 15px; line-height: 1.7; color: var(--text); padding-top: 4px; }
+
+  /* ── 考試進度顯示 ── */
+  .exam-log {
+    display: none; flex-direction: column; gap: 6px; margin-bottom: 1rem;
+    max-height: 260px; overflow-y: auto;
+  }
+  .exam-log.visible { display: flex; }
+  .elog-item {
+    padding: 8px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+    font-size: 14px; line-height: 1.6; color: var(--text2);
+    display: flex; align-items: flex-start; gap: 10px;
+    transition: background 0.2s;
+  }
+  .elog-item.active { background: var(--purple-bg); border-color: var(--purple-border); color: var(--text); }
+  .elog-tag {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px;
+    white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+  }
+  .etag-title { background: #EDE9FE; color: #5B21B6; }
+  .etag-q { background: var(--green-bg); color: #15803D; }
+  .etag-dial { background: var(--blue-bg); color: #1D4ED8; }
+  .etag-opt { background: var(--amber-bg); color: #92400E; }
+  .etag-pause { background: var(--surface2); color: var(--text2); }
+  .etag-narr { background: #F1F5F9; color: #475569; }
+
+  /* ── 按鈕列 ── */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-sec {
+    font-size: 13px; padding: 8px 16px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif; transition: background 0.15s;
+  }
+  .btn-sec:hover { background: var(--surface2); }
+  .save-note { font-size: 12px; color: var(--text2); margin-top: 8px; min-height: 1em; }
+
+  /* ── 折疊說明 ── */
+  .rec-help {
+    margin-top: 1rem; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px; font-size: 13px;
+  }
+  .rec-help summary {
+    cursor: pointer; font-weight: 600; color: var(--text2); user-select: none;
+  }
+  .rec-help summary:hover { color: var(--text); }
+  .rec-body { margin-top: 10px; line-height: 1.8; color: var(--text2); }
+  .rec-body strong { color: var(--text); }
+
+  .no-support {
+    background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626;
+    border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px;
+    margin-bottom: 1rem; display: none;
+  }
+
+  footer { margin-top: 2rem; text-align: center; font-size: 12px; color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎧 聽力教材製作工具</h1>
+    <p>對話練習 ＋ 聽力考試兩用 · <span style="color:var(--text2)">Shelleytaiwan 使用 AI 製作</span></p>
+  </header>
+
+  <div id="no-support" class="no-support">
+    ⚠️ 此瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。
+  </div>
+
+  <!-- ── Tab 切換 ── -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dialog')">💬 對話練習</button>
+    <button class="tab-btn" onclick="switchTab('exam')">📝 聽力考試</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       分頁一：對話練習（原有功能）
+  ══════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-dialog">
+
+    <div class="hint-box">
+      📌 格式說明：<br>
+      <strong>A：</strong> 開頭 → A 角色朗讀<br>
+      <strong>B：</strong> 開頭 → B 角色朗讀<br>
+      其他行 → 旁白朗讀（單篇文章請直接貼上，全部由旁白朗讀）<br>
+      ⏱ <strong>對話停頓</strong>＝A、B 對話之間；<strong>旁白停頓</strong>＝旁白前後自動加長，給學生思考作答時間
+    </div>
+
+    <div class="card">
+      <div class="card-title">對話內容</div>
+      <textarea id="dialogue-input" placeholder="聽男女對話，回答問題。&#10;A：一件300。&#10;B：有打折嗎？&#10;A：抱歉，沒有。&#10;請問男的想買什麼？"></textarea>
+    </div>
+
+    <div class="voice-grid">
+      <button class="btn-sec" type="button" onclick="reloadVoices()" style="grid-column:1 / -1; margin-bottom:4px;">
+        🔄 聲音選單空白？點我重新載入
+      </button>
+      <div class="voice-card">
+        <div class="role-label col-a"><span class="dot dot-a"></span>A 角色</div>
+        <select id="voice-a"></select>
+        <button class="preview-btn" onclick="preview('a')">▶ 試聽 A</button>
+        <div class="speed-row">
+          <label>速度</label>
+          <input type="range" id="sp-a" min="0.5" max="1.3" step="0.05" value="0.65"
+            oninput="document.getElementById('spv-a').textContent=parseFloat(this.value).toFixed(2)+'×'">
+          <span class="spv" id="spv-a">0.65×</span>
+        </div>
+        <div class="speed-row">
+          <label>音調</label>
+          <input type="range" id="pt-a" min="0.5" max="1.5" step="0.05" value="1"
+            oninput="document.getElementById('ptv-a').textContent=fmtPitch(this.value)">
+          <span class="spv" id="ptv-a">標準</span>
+        </div>
+      </div>
+      <div class="voice-card">
+        <div class="role-label col-b"><span class="dot dot-b"></span>B 角色</div>
+        <select id="voice-b"></select>
+        <button class="preview-btn" onclick="preview('b')">▶ 試聽 B</button>
+        <div class="speed-row">
+          <label>速度</label>
+          <input type="range" id="sp-b" min="0.5" max="1.3" step="0.05" value="0.65"
+            oninput="document.getElementById('spv-b').textContent=parseFloat(this.value).toFixed(2)+'×'">
+          <span class="spv" id="spv-b">0.65×</span>
+        </div>
+        <div class="speed-row">
+          <label>音調</label>
+          <input type="range" id="pt-b" min="0.5" max="1.5" step="0.05" value="1"
+            oninput="document.getElementById('ptv-b').textContent=fmtPitch(this.value)">
+          <span class="spv" id="ptv-b">標準</span>
+        </div>
+      </div>
+      <div class="voice-card">
+        <div class="role-label col-t"><span class="dot dot-t"></span>旁白</div>
+        <select id="voice-t"></select>
+        <button class="preview-btn" onclick="preview('t')">▶ 試聽旁白</button>
+        <div class="speed-row">
+          <label>速度</label>
+          <input type="range" id="sp-t" min="0.5" max="1.3" step="0.05" value="0.7"
+            oninput="document.getElementById('spv-t').textContent=parseFloat(this.value).toFixed(2)+'×'">
+          <span class="spv" id="spv-t">0.70×</span>
+        </div>
+        <div class="speed-row">
+          <label>音調</label>
+          <input type="range" id="pt-t" min="0.5" max="1.5" step="0.05" value="1"
+            oninput="document.getElementById('ptv-t').textContent=fmtPitch(this.value)">
+          <span class="spv" id="ptv-t">標準</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gap-row">
+      <label>💬 對話停頓</label>
+      <input type="range" id="gap-dialog" min="200" max="3000" step="100" value="1500"
+        oninput="document.getElementById('gap-dialog-val').textContent=fmtGap(this.value)">
+      <span class="spv" id="gap-dialog-val">1.5秒</span>
+    </div>
+    <div class="gap-row">
+      <label>📢 旁白停頓（前後）</label>
+      <input type="range" id="gap-narr" min="500" max="15000" step="500" value="4000"
+        oninput="document.getElementById('gap-narr-val').textContent=fmtGap(this.value)">
+      <span class="spv" id="gap-narr-val">4秒</span>
+    </div>
+
+    <div class="playback-bar">
+      <button class="btn-play" id="d-btn-play" title="播放 / 暫停">▶</button>
+      <button class="btn-stop" id="d-btn-stop" title="停止">■</button>
+      <div class="progress-wrap">
+        <div class="progress-bg"><div class="progress-fill" id="d-prog-fill" style="width:0%"></div></div>
+        <div class="prog-labels"><span id="d-line-cur">0</span><span id="d-line-total">0 行</span></div>
+      </div>
+      <span class="status-badge" id="d-status-msg">準備就緒</span>
+    </div>
+
+    <div class="dialogue-box" id="dialogue-box"></div>
+
+    <div class="btn-row">
+      <button class="btn-sec" id="btn-export">💾 匯出設定檔</button>
+      <button class="btn-sec" id="btn-import">📂 匯入設定檔</button>
+      <button class="btn-sec" id="btn-localsave">🏠 本機儲存</button>
+      <button class="btn-sec" id="btn-clear">🗑 清除</button>
+      <button class="btn-sec" id="btn-demo">📄 載入示範</button>
+    </div>
+    <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+    <div class="save-note" id="save-note"></div>
+
+    <details class="rec-help">
+      <summary>📱 iPad 只有兩種聲音？解決方法</summary>
+      <div class="rec-body">
+        <strong>方法一：用「音調」做出男聲（最可靠）</strong><br>
+        把 A 角色的<strong>音調拉低到 0.6～0.7</strong>，聽起來就像男聲；B 保持標準；旁白可微調高。<br><br>
+        <strong>方法二：嘗試下載更多聲音</strong><br>
+        設定 → 輔助使用 → 朗讀內容 → 聲音 → 中文，下載 <strong>Eddy、Reed、Rocko</strong>，完全關閉 Safari 再重開。<br><br>
+        <button class="btn-sec" type="button" onclick="showVoiceList()">🔍 顯示此設備開放的全部聲音</button>
+        <div id="voice-list-out" style="margin-top:8px;font-size:13px;line-height:1.8;"></div>
+      </div>
+    </details>
+
+    <details class="rec-help">
+      <summary>🎙 如何錄成聽力考試音檔（免金鑰）</summary>
+      <div class="rec-body">
+        <strong>iPad / iPhone（最推薦）</strong><br>
+        設定 → 控制中心 → 加入「螢幕錄製」→ 右上角下滑開控制中心 → 按 ⏺ 開始錄製 → 按工具的 ▶ 播放。<br><br>
+        <strong>Mac</strong><br>
+        Mac 內建錄製無法收系統聲音，建議改用 iPad 錄，或安裝免費的 BlackHole 虛擬音訊後用 QuickTime 錄製。
+      </div>
+    </details>
+  </div><!-- /panel-dialog -->
+
+
+  <!-- ══════════════════════════════════════
+       分頁二：聽力考試
+  ══════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-exam">
+
+    <div class="hint-box purple">
+      📌 格式說明（考試模式）：<br>
+      <strong># 標題</strong> → 慢讀 ＋ 前後長停頓<br>
+      <strong>1. 題目</strong> 或 <strong>1、題目</strong> → 自動唸「第一題」，慢讀 ＋ 前後停頓<br>
+      <strong>A. 選項</strong>、<strong>B. 選項</strong>、<strong>C. 選項</strong> → 前停頓後唸選項<br>
+      <strong>男：／女：／A：／B：</strong> → 對話，自然語速<br>
+      其他行 → 旁白說明，慢讀
+    </div>
+
+    <div class="card">
+      <div class="card-title">考卷內容</div>
+      <textarea id="exam-input" style="min-height:220px;" placeholder="# 第一回聽力測驗&#10;&#10;說明：請仔細聆聽，選出最適合的答案。&#10;&#10;1. 男的要去哪裡？&#10;男：請問圖書館怎麼走？&#10;女：往前走，右邊的大樓就是。&#10;A. 圖書館&#10;B. 學校&#10;C. 醫院&#10;&#10;2. 女的幾點起床？&#10;男：你每天幾點起床？&#10;女：六點半，不過今天睡過頭了。&#10;A. 六點&#10;B. 六點半&#10;C. 七點"></textarea>
+    </div>
+
+    <!-- 停頓設定 -->
+    <div class="pause-grid">
+      <div class="pause-card">
+        <label>標題語速 <span class="pval" id="ev-title-rate">0.75×</span></label>
+        <input type="range" id="er-title-rate" min="50" max="100" value="75" step="5"
+          oninput="document.getElementById('ev-title-rate').textContent=(this.value/100).toFixed(2)+'×'">
+      </div>
+      <div class="pause-card">
+        <label>標題停頓（秒）<span class="pval" id="ev-title-pause">3.0s</span></label>
+        <input type="range" id="er-title-pause" min="10" max="80" value="30" step="5"
+          oninput="document.getElementById('ev-title-pause').textContent=(this.value/10).toFixed(1)+'s'">
+      </div>
+      <div class="pause-card">
+        <label>題目語速 <span class="pval" id="ev-q-rate">0.80×</span></label>
+        <input type="range" id="er-q-rate" min="50" max="100" value="80" step="5"
+          oninput="document.getElementById('ev-q-rate').textContent=(this.value/100).toFixed(2)+'×'">
+      </div>
+      <div class="pause-card">
+        <label>題目前後停頓（秒）<span class="pval" id="ev-q-pause">2.0s</span></label>
+        <input type="range" id="er-q-pause" min="5" max="60" value="20" step="5"
+          oninput="document.getElementById('ev-q-pause').textContent=(this.value/10).toFixed(1)+'s'">
+      </div>
+      <div class="pause-card">
+        <label>對話語速 <span class="pval" id="ev-dial-rate">1.00×</span></label>
+        <input type="range" id="er-dial-rate" min="70" max="130" value="100" step="5"
+          oninput="document.getElementById('ev-dial-rate').textContent=(this.value/100).toFixed(2)+'×'">
+      </div>
+      <div class="pause-card">
+        <label>選項前停頓（秒）<span class="pval" id="ev-opt-pause">1.5s</span></label>
+        <input type="range" id="er-opt-pause" min="5" max="50" value="15" step="5"
+          oninput="document.getElementById('ev-opt-pause').textContent=(this.value/10).toFixed(1)+'s'">
+      </div>
+    </div>
+
+    <!-- 考試聲音選擇 -->
+    <div class="exam-voice-grid">
+      <div class="voice-card">
+        <div class="role-label col-a"><span class="dot dot-a"></span>男聲 / A角色</div>
+        <select id="exam-voice-a"></select>
+        <button class="preview-btn" onclick="examPreview('a')">▶ 試聽</button>
+        <div class="speed-row">
+          <label>音調</label>
+          <input type="range" id="exam-pt-a" min="0.5" max="1.5" step="0.05" value="0.75"
+            oninput="document.getElementById('exam-ptv-a').textContent=fmtPitch(this.value)">
+          <span class="spv" id="exam-ptv-a">低 0.75</span>
+        </div>
+      </div>
+      <div class="voice-card">
+        <div class="role-label col-b"><span class="dot dot-b"></span>女聲 / B角色</div>
+        <select id="exam-voice-b"></select>
+        <button class="preview-btn" onclick="examPreview('b')">▶ 試聽</button>
+        <div class="speed-row">
+          <label>音調</label>
+          <input type="range" id="exam-pt-b" min="0.5" max="1.5" step="0.05" value="1.15"
+            oninput="document.getElementById('exam-ptv-b').textContent=fmtPitch(this.value)">
+          <span class="spv" id="exam-ptv-b">高 1.15</span>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;">
+      💡 iPad 只有一兩種聲音時：兩欄選同一個聲音，左邊音調調低（模擬男聲），右邊音調調高（女聲）
+    </p>
+
+    <!-- 播放列 -->
+    <div class="playback-bar">
+      <button class="btn-play" id="e-btn-play" title="播放 / 暫停">▶</button>
+      <button class="btn-stop" id="e-btn-stop" title="停止">■</button>
+      <div class="progress-wrap">
+        <div class="progress-bg"><div class="progress-fill" id="e-prog-fill" style="width:0%"></div></div>
+        <div class="prog-labels"><span id="e-seg-cur">0</span><span id="e-seg-total">0 段</span></div>
+      </div>
+      <span class="status-badge" id="e-status-msg">準備就緒</span>
+    </div>
+
+    <div class="exam-log" id="exam-log"></div>
+
+    <div class="btn-row" style="margin-bottom:1rem;">
+      <button class="btn-sec" onclick="examPreviewParse()">🔍 預覽段落結構</button>
+      <button class="btn-sec" id="exam-btn-demo">📄 載入示範</button>
+    </div>
+
+    <details class="rec-help">
+      <summary>📌 考試格式完整範例</summary>
+      <div class="rec-body" style="font-family:monospace;font-size:13px;white-space:pre-wrap;">
+# 第一回聽力測驗
+
+說明：請仔細聆聽，選出最適合的答案。
+
+1. 男的要去哪裡？
+男：請問圖書館怎麼走？
+女：往前走，右邊的大樓就是。
+A. 圖書館
+B. 學校
+C. 醫院
+
+2. 女的幾點起床？
+男：你每天幾點起床？
+女：六點半，不過今天睡過頭了。
+A. 六點
+B. 六點半
+C. 七點
+      </div>
+    </details>
+
+  </div><!-- /panel-exam -->
+
+  <footer>電腦請使用 Chrome 或 Edge · iPad / iPhone 請使用 Safari</footer>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   共用：語音引擎
+════════════════════════════════════════ */
+const synth = window.speechSynthesis;
+if (!synth) document.getElementById('no-support').style.display = 'block';
+
+let allVoices = [];
+let pendingVoices = null;
+
+const BLOCKED_NAMES = ['grandma','grandpa','flo','sandy','shelley','eddy','zh-hk','yue','cantonese'];
+
+function isBlocked(v) {
+  const k = (v.name + ' ' + v.lang).toLowerCase();
+  return BLOCKED_NAMES.some(b => k.includes(b));
+}
+
+// 取中文聲音池（電腦：過濾廣東話；iPad聲音少時全開放）
+function getPool() {
+  const zh = allVoices.filter(v =>
+    v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-CN') || v.lang.startsWith('zh')
+  );
+  const base = zh.length ? zh : allVoices;
+  const filtered = base.filter(v => !isBlocked(v));
+  return filtered.length >= 3 ? filtered : base;
+}
+
+function populateAll() {
+  const pool = getPool();
+  let opts;
+  if (pool.length) {
+    opts = pool.map(v =>
+      `<option value="${allVoices.indexOf(v)}">${v.name} (${v.lang})</option>`
+    ).join('');
+  } else {
+    opts = `<option value="-1">系統預設聲音</option>`;
+  }
+  // 對話模式聲音
+  ['a','b','t'].forEach(r => {
+    document.getElementById('voice-' + r).innerHTML = opts;
+  });
+  if (pool.length >= 2) document.getElementById('voice-b').selectedIndex = 1;
+  if (pool.length >= 3) document.getElementById('voice-t').selectedIndex = 2;
+  // 考試模式聲音
+  ['a','b'].forEach(r => {
+    document.getElementById('exam-voice-' + r).innerHTML = opts;
+  });
+  if (pool.length >= 2) document.getElementById('exam-voice-b').selectedIndex = 1;
+  applyPendingVoices();
+}
+
+function loadVoices() {
+  allVoices = synth.getVoices();
+  populateAll();
+}
+function warmUpVoices() {
+  try {
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0; synth.speak(u); synth.cancel();
+  } catch {}
+}
+if (synth) {
+  synth.onvoiceschanged = loadVoices;
+  loadVoices(); warmUpVoices();
+  [300, 800, 1500, 3000, 5000].forEach(ms => setTimeout(() => {
+    if (!allVoices.length) { warmUpVoices(); loadVoices(); }
+  }, ms));
+}
+function reloadVoices() {
+  warmUpVoices();
+  setTimeout(() => {
+    loadVoices();
+    noteMsg(allVoices.length
+      ? '✅ 已重新載入 ' + allVoices.length + ' 種聲音'
+      : 'ℹ️ 此設備未提供聲音清單，已切換為系統預設聲音＋音調變聲模式');
+  }, 400);
+}
+
+function fmtPitch(v) {
+  const p = parseFloat(v);
+  if (Math.abs(p - 1) < 0.01) return '標準';
+  return p < 1 ? '低 ' + p.toFixed(2) : '高 ' + p.toFixed(2);
+}
+function fmtGap(v) {
+  const s = parseInt(v) / 1000;
+  return (s % 1 === 0 ? s : s.toFixed(1)) + '秒';
+}
+
+function getVoiceBySelectId(selectId) {
+  const idx = parseInt(document.getElementById(selectId).value);
+  return (!isNaN(idx) && allVoices[idx]) ? allVoices[idx] : null;
+}
+
+function showVoiceList() {
+  const out = document.getElementById('voice-list-out');
+  const vs = synth ? synth.getVoices() : [];
+  if (!vs.length) { out.innerHTML = '⚠️ 目前讀不到任何聲音，請重新整理頁面再試。'; return; }
+  const zh = vs.filter(v => v.lang.toLowerCase().startsWith('zh'));
+  out.innerHTML =
+    `<strong>中文聲音 ${zh.length} 種：</strong><br>` +
+    (zh.length ? zh.map(v => `• ${v.name}（${v.lang}）`).join('<br>') : '（無）') +
+    `<br><br>此設備總共開放 ${vs.length} 種聲音給網頁。`;
+}
+
+/* ════════════════════════════════════════
+   Tab 切換
+════════════════════════════════════════ */
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 ? 'dialog' : 'exam') === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + id);
+  });
+}
+
+/* ════════════════════════════════════════
+   對話模式邏輯（原有，稍微整理）
+════════════════════════════════════════ */
+let dLines = [], dCurIdx = 0, dPlaying = false, dPaused = false, dStopReq = false;
+
+const DEMO_DIALOG = `聽男女對話，回答問題。
+A：歡迎光臨，看看哦！
+B：你好，請問有台灣特色的T恤嗎？
+A：有，您自己穿還是送人呢？
+B：送人。
+A：好的，這是今年的新款，您覺得怎麼樣？
+B：這件太紅了。
+A：我們有5種顏色。
+B：多少錢？
+A：一件300。
+B：有打折嗎？
+A：抱歉，沒有。
+B：我多買幾件，可以打折嗎？
+A：可以，買5送1。
+B：那，黑、黃、藍各兩件。
+請問男的最後買了幾件？`;
+
+const previewText = {
+  a: '你好，我是A角色，很高興認識你。',
+  b: '你好，我是B角色，很高興認識你。',
+  t: '同學，請注意聽，現在開始題目。'
+};
+
+function preview(role) {
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(previewText[role]);
+  u.rate = parseFloat(document.getElementById('sp-' + role).value);
+  u.pitch = parseFloat(document.getElementById('pt-' + role).value);
+  const v = getVoiceBySelectId('voice-' + role);
+  if (v) u.voice = v;
+  synth.speak(u);
+}
+
+function parseDialogLines(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^([AB])[：:]\s*(.+)/i);
+    if (m) return { role: m[1].toUpperCase(), text: m[2].trim() };
+    return { role: 'T', text: l };
+  });
+}
+function dActClass(r) { return r==='A'?'act-a':r==='B'?'act-b':'act-t'; }
+function dAvClass(r) { return r==='A'?'av-a':r==='B'?'av-b':'av-t'; }
+function dAvLabel(r) { return r==='A'?'A':r==='B'?'B':'師'; }
+
+function dRenderDialogue(activeIdx) {
+  const box = document.getElementById('dialogue-box');
+  box.classList.add('visible');
+  box.innerHTML = dLines.map((l, i) =>
+    `<div class="dline ${i===activeIdx ? dActClass(l.role) : ''}" id="dl-${i}">
+      <div class="avatar ${dAvClass(l.role)}">${dAvLabel(l.role)}</div>
+      <div class="line-text">${l.text}</div>
+    </div>`
+  ).join('');
+  const el = document.getElementById('dl-' + activeIdx);
+  if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function dSetStatus(text, cls) {
+  const el = document.getElementById('d-status-msg');
+  el.textContent = text;
+  el.className = 'status-badge' + (cls ? ' ' + cls : '');
+}
+function dSetPlayBtn(isPlaying) {
+  const bp = document.getElementById('d-btn-play');
+  bp.innerHTML = isPlaying ? '⏸' : '▶';
+  bp.className = 'btn-play' + (isPlaying ? '' : ' paused');
+}
+
+async function dSpeakLine(idx) {
+  if (dStopReq || idx >= dLines.length) { dFinish(); return; }
+  dCurIdx = idx;
+  dRenderDialogue(idx);
+  document.getElementById('d-line-cur').textContent = idx + 1;
+  document.getElementById('d-prog-fill').style.width = Math.round((idx / dLines.length) * 100) + '%';
+
+  const l = dLines[idx];
+  const roleKey = l.role === 'A' ? 'a' : l.role === 'B' ? 'b' : 't';
+  const rate = parseFloat(document.getElementById('sp-' + roleKey).value);
+
+  await new Promise(res => {
+    const u = new SpeechSynthesisUtterance(l.text);
+    u.rate = rate;
+    u.pitch = parseFloat(document.getElementById('pt-' + roleKey).value);
+    const v = getVoiceBySelectId('voice-' + roleKey);
+    if (v) u.voice = v;
+    u.onend = res; u.onerror = res;
+    synth.speak(u);
+  });
+
+  if (dStopReq) { dFinish(); return; }
+
+  const next = dLines[idx + 1];
+  let gapMs;
+  if (next === undefined) {
+    gapMs = 0;
+  } else if (l.role === 'T' || next.role === 'T') {
+    gapMs = parseInt(document.getElementById('gap-narr').value);
+  } else {
+    gapMs = parseInt(document.getElementById('gap-dialog').value);
+  }
+  if (gapMs > 0) {
+    const t0 = Date.now();
+    while (Date.now() - t0 < gapMs) {
+      if (dStopReq || !dPlaying) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
+  }
+  if (dStopReq) { dFinish(); return; }
+  if (!dStopReq && dPlaying) dSpeakLine(idx + 1);
+}
+
+function dStart() {
+  const text = document.getElementById('dialogue-input').value.trim();
+  if (!text) { dSetStatus('請輸入內容'); return; }
+  dLines = parseDialogLines(text);
+  document.getElementById('d-line-total').textContent = dLines.length + ' 行';
+  dPlaying = true; dPaused = false; dStopReq = false;
+  dSetPlayBtn(true); dSetStatus('朗讀中...', 'playing');
+  document.getElementById('d-prog-fill').style.width = '0%';
+  synth.cancel();
+  dSpeakLine(0);
+}
+function dFinish() {
+  dPlaying = false; dPaused = false;
+  dSetPlayBtn(false);
+  dSetStatus(dStopReq ? '已停止' : '完成 ✓', dStopReq ? '' : 'done');
+  if (!dStopReq) {
+    document.getElementById('d-prog-fill').style.width = '100%';
+    document.getElementById('d-line-cur').textContent = dLines.length;
+  }
+}
+
+document.getElementById('d-btn-play').addEventListener('click', () => {
+  if (!synth) return;
+  if (!dPlaying && !dPaused) { dStart(); return; }
+  if (dPlaying) {
+    synth.pause(); dPlaying = false; dPaused = true;
+    dSetPlayBtn(false); dSetStatus('已暫停', 'paused');
+  } else {
+    synth.resume(); dPaused = false; dPlaying = true;
+    dSetPlayBtn(true); dSetStatus('朗讀中...', 'playing');
+  }
+});
+document.getElementById('d-btn-stop').addEventListener('click', () => {
+  dStopReq = true; dPlaying = false; dPaused = false; synth.cancel();
+  dSetPlayBtn(false); dSetStatus('已停止');
+  document.getElementById('d-prog-fill').style.width = '0%';
+  document.getElementById('d-line-cur').textContent = '0';
+  document.getElementById('dialogue-box').classList.remove('visible');
+});
+document.getElementById('btn-clear').addEventListener('click', () => {
+  dStopReq = true; synth && synth.cancel();
+  document.getElementById('dialogue-input').value = '';
+  document.getElementById('dialogue-box').classList.remove('visible');
+  document.getElementById('d-prog-fill').style.width = '0%';
+  document.getElementById('d-line-cur').textContent = '0';
+  document.getElementById('d-line-total').textContent = '0 行';
+  dSetStatus('準備就緒'); dPlaying = false; dPaused = false; dSetPlayBtn(false);
+});
+document.getElementById('btn-demo').addEventListener('click', () => {
+  document.getElementById('dialogue-input').value = DEMO_DIALOG;
+});
+
+
+/* ════════════════════════════════════════
+   考試模式邏輯
+════════════════════════════════════════ */
+const ZH_NUM = ['零','一','二','三','四','五','六','七','八','九','十',
+  '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+  '二十一','二十二','二十三','二十四','二十五','二十六','二十七','二十八','二十九','三十'];
+
+const DEMO_EXAM = `# 第一回聽力測驗
+
+說明：請仔細聆聽，選出最適合的答案。
+
+1. 男的要去哪裡？
+男：請問圖書館怎麼走？
+女：往前走，右邊的大樓就是。
+A. 圖書館
+B. 學校
+C. 醫院
+
+2. 女的幾點起床？
+男：你每天幾點起床？
+女：六點半，不過今天睡過頭了。
+A. 六點
+B. 六點半
+C. 七點`;
+
+document.getElementById('exam-btn-demo').addEventListener('click', () => {
+  document.getElementById('exam-input').value = DEMO_EXAM;
+});
+
+function examPreview(role) {
+  synth.cancel();
+  const text = role === 'a' ? '你好，我是男生角色。' : '你好，我是女生角色。';
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.85;
+  u.pitch = parseFloat(document.getElementById('exam-pt-' + role).value);
+  const v = getVoiceBySelectId('exam-voice-' + role);
+  if (v) u.voice = v;
+  synth.speak(u);
+}
+
+function parseExam(text) {
+  const lines = text.split('\n');
+  const segs = [];
+  let qNum = 0;
+
+  const titleRate = parseFloat(document.getElementById('er-title-rate').value) / 100;
+  const titlePause = parseFloat(document.getElementById('er-title-pause').value) / 10;
+  const qRate = parseFloat(document.getElementById('er-q-rate').value) / 100;
+  const qPause = parseFloat(document.getElementById('er-q-pause').value) / 10;
+  const dialRate = parseFloat(document.getElementById('er-dial-rate').value) / 100;
+  const optPause = parseFloat(document.getElementById('er-opt-pause').value) / 10;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    if (line.startsWith('#')) {
+      const t = line.replace(/^#+\s*/, '');
+      segs.push({ type: 'pause', dur: titlePause / 2, label: `停頓 ${(titlePause/2).toFixed(1)}s`, tag: 'etag-pause' });
+      segs.push({ type: 'speak', text: t, rate: titleRate, role: 'b', label: '標題', tag: 'etag-title' });
+      segs.push({ type: 'pause', dur: titlePause, label: `停頓 ${titlePause.toFixed(1)}s`, tag: 'etag-pause' });
+
+    } else if (/^\d+[\.、]/.test(line)) {
+      qNum++;
+      const zh = qNum <= 30 ? ZH_NUM[qNum] : String(qNum);
+      const body = line.replace(/^\d+[\.、]\s*/, '');
+      segs.push({ type: 'pause', dur: qPause, label: `停頓 ${qPause.toFixed(1)}s`, tag: 'etag-pause' });
+      segs.push({ type: 'speak', text: `第${zh}題。${body}`, rate: qRate, role: 'b', label: `第${zh}題`, tag: 'etag-q' });
+      segs.push({ type: 'pause', dur: qPause / 2, label: `停頓 ${(qPause/2).toFixed(1)}s`, tag: 'etag-pause' });
+
+    } else if (/^[A-D][\.、]/.test(line)) {
+      const letter = line[0];
+      const body = line.replace(/^[A-D][\.、]\s*/, '');
+      segs.push({ type: 'pause', dur: optPause, label: `停頓 ${optPause.toFixed(1)}s`, tag: 'etag-pause' });
+      segs.push({ type: 'speak', text: `${letter}。${body}`, rate: 1.0, role: 'b', label: `選項 ${letter}`, tag: 'etag-opt' });
+
+    } else if (/^(男|女)[：:]/.test(line)) {
+      const isMale = line.startsWith('男');
+      const body = line.replace(/^[男女][：:]\s*/, '');
+      segs.push({ type: 'speak', text: body, rate: dialRate, role: isMale ? 'a' : 'b', label: isMale ? '男' : '女', tag: 'etag-dial' });
+
+    } else if (/^[AB][：:]/.test(line)) {
+      const isA = line.startsWith('A');
+      const body = line.replace(/^[AB][：:]\s*/, '');
+      segs.push({ type: 'speak', text: body, rate: dialRate, role: isA ? 'a' : 'b', label: isA ? 'A' : 'B', tag: 'etag-dial' });
+
+    } else {
+      segs.push({ type: 'speak', text: line, rate: qRate, role: 'b', label: '說明', tag: 'etag-narr' });
+    }
+  }
+  return segs;
+}
+
+let eSegs = [], eCurIdx = 0, ePlaying = false, ePaused = false, eStopReq = false;
+
+function eSetStatus(text, cls) {
+  const el = document.getElementById('e-status-msg');
+  el.textContent = text;
+  el.className = 'status-badge' + (cls ? ' ' + cls : '');
+}
+function eSetPlayBtn(isPlaying) {
+  const bp = document.getElementById('e-btn-play');
+  bp.innerHTML = isPlaying ? '⏸' : '▶';
+  bp.className = 'btn-play' + (isPlaying ? '' : ' paused');
+}
+
+function examPreviewParse() {
+  const text = document.getElementById('exam-input').value.trim();
+  if (!text) { eSetStatus('請先輸入考卷內容'); return; }
+  eSegs = parseExam(text);
+  const log = document.getElementById('exam-log');
+  log.classList.add('visible');
+  log.innerHTML = eSegs.map((s, i) =>
+    `<div class="elog-item" id="eitem-${i}">
+      <span class="elog-tag ${s.tag}">${s.label}</span>
+      <span>${s.type === 'pause' ? `⏸ 靜音 ${s.dur}秒` : (s.text.length > 55 ? s.text.slice(0,55)+'…' : s.text)}</span>
+    </div>`
+  ).join('');
+  document.getElementById('e-seg-total').textContent = eSegs.length + ' 段';
+  eSetStatus('已解析 ' + eSegs.filter(s=>s.type==='speak').length + ' 個語音段落', 'done');
+}
+
+async function eSpeakSeg(idx) {
+  if (eStopReq || idx >= eSegs.length) { eFinish(); return; }
+  eCurIdx = idx;
+  document.getElementById('e-seg-cur').textContent = idx + 1;
+  document.getElementById('e-prog-fill').style.width = Math.round((idx / eSegs.length) * 100) + '%';
+
+  // 高亮
+  const log = document.getElementById('exam-log');
+  if (log.classList.contains('visible')) {
+    log.querySelectorAll('.elog-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+    const active = document.getElementById('eitem-' + idx);
+    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  const seg = eSegs[idx];
+
+  if (seg.type === 'pause') {
+    eSetStatus(`⏸ 停頓 ${seg.dur} 秒...`);
+    const t0 = Date.now();
+    while (Date.now() - t0 < seg.dur * 1000) {
+      if (eStopReq) break;
+      await new Promise(r => setTimeout(r, 80));
+    }
+    if (eStopReq) { eFinish(); return; }
+    eSpeakSeg(idx + 1);
+    return;
+  }
+
+  eSetStatus(`▶ ${seg.label}：${seg.text.slice(0,30)}${seg.text.length>30?'…':''}`, 'playing');
+  await new Promise(res => {
+    const u = new SpeechSynthesisUtterance(seg.text);
+    u.rate = seg.rate || 1.0;
+    u.pitch = parseFloat(document.getElementById('exam-pt-' + seg.role).value);
+    const v = getVoiceBySelectId('exam-voice-' + seg.role);
+    if (v) u.voice = v;
+    u.onend = res; u.onerror = res;
+    synth.speak(u);
+  });
+  if (eStopReq) { eFinish(); return; }
+  eSpeakSeg(idx + 1);
+}
+
+function eStart() {
+  const text = document.getElementById('exam-input').value.trim();
+  if (!text) { eSetStatus('請輸入考卷內容'); return; }
+  eSegs = parseExam(text);
+  document.getElementById('e-seg-total').textContent = eSegs.length + ' 段';
+  // 顯示 log
+  const log = document.getElementById('exam-log');
+  log.classList.add('visible');
+  log.innerHTML = eSegs.map((s, i) =>
+    `<div class="elog-item" id="eitem-${i}">
+      <span class="elog-tag ${s.tag}">${s.label}</span>
+      <span>${s.type === 'pause' ? `⏸ 靜音 ${s.dur}秒` : (s.text.length > 55 ? s.text.slice(0,55)+'…' : s.text)}</span>
+    </div>`
+  ).join('');
+  ePlaying = true; ePaused = false; eStopReq = false;
+  eSetPlayBtn(true); eSetStatus('朗讀中...', 'playing');
+  document.getElementById('e-prog-fill').style.width = '0%';
+  synth.cancel();
+  eSpeakSeg(0);
+}
+function eFinish() {
+  ePlaying = false; ePaused = false;
+  eSetPlayBtn(false);
+  eSetStatus(eStopReq ? '已停止' : '完成 ✓', eStopReq ? '' : 'done');
+  if (!eStopReq) document.getElementById('e-prog-fill').style.width = '100%';
+}
+
+document.getElementById('e-btn-play').addEventListener('click', () => {
+  if (!synth) return;
+  if (!ePlaying && !ePaused) { eStart(); return; }
+  if (ePlaying) {
+    synth.pause(); ePlaying = false; ePaused = true;
+    eSetPlayBtn(false); eSetStatus('已暫停', 'paused');
+  } else {
+    synth.resume(); ePaused = false; ePlaying = true;
+    eSetPlayBtn(true); eSetStatus('朗讀中...', 'playing');
+  }
+});
+document.getElementById('e-btn-stop').addEventListener('click', () => {
+  eStopReq = true; ePlaying = false; ePaused = false; synth.cancel();
+  eSetPlayBtn(false); eSetStatus('已停止');
+  document.getElementById('e-prog-fill').style.width = '0%';
+  document.getElementById('e-seg-cur').textContent = '0';
+});
+
+
+/* ════════════════════════════════════════
+   設定儲存（對話模式）
+════════════════════════════════════════ */
+const LS_KEY = 'tts-dialog-settings';
+
+function collectSettings() {
+  const voiceName = r => {
+    const sel = document.getElementById('voice-' + r);
+    const v = allVoices[parseInt(sel.value)];
+    return v ? { name: v.name, lang: v.lang } : null;
+  };
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    text: document.getElementById('dialogue-input').value,
+    voices: { a: voiceName('a'), b: voiceName('b'), t: voiceName('t') },
+    speeds: {
+      a: document.getElementById('sp-a').value,
+      b: document.getElementById('sp-b').value,
+      t: document.getElementById('sp-t').value
+    },
+    pitches: {
+      a: document.getElementById('pt-a').value,
+      b: document.getElementById('pt-b').value,
+      t: document.getElementById('pt-t').value
+    },
+    gaps: {
+      dialog: document.getElementById('gap-dialog').value,
+      narr: document.getElementById('gap-narr').value
+    }
+  };
+}
+
+function setSlider(id, labelId, val, fmt) {
+  const el = document.getElementById(id);
+  if (val === undefined || val === null) return;
+  el.value = val;
+  document.getElementById(labelId).textContent = fmt(el.value);
+}
+function applyVoiceByName(role, saved) {
+  if (!saved) return;
+  const sel = document.getElementById('voice-' + role);
+  let idx = allVoices.findIndex(v => v.name === saved.name && v.lang === saved.lang);
+  if (idx === -1) idx = allVoices.findIndex(v => v.name === saved.name);
+  if (idx === -1) return;
+  for (const opt of sel.options) {
+    if (parseInt(opt.value) === idx) { sel.value = opt.value; break; }
+  }
+}
+function applyPendingVoices() {
+  if (!pendingVoices) return;
+  ['a','b','t'].forEach(r => applyVoiceByName(r, pendingVoices[r]));
+  pendingVoices = null;
+}
+function applySettings(s) {
+  if (!s || typeof s !== 'object') return false;
+  if (typeof s.text === 'string') document.getElementById('dialogue-input').value = s.text;
+  const sp = s.speeds || {}, spFmt = v => parseFloat(v).toFixed(2) + '×';
+  setSlider('sp-a', 'spv-a', sp.a, spFmt);
+  setSlider('sp-b', 'spv-b', sp.b, spFmt);
+  setSlider('sp-t', 'spv-t', sp.t, spFmt);
+  const pt = s.pitches || {};
+  setSlider('pt-a', 'ptv-a', pt.a, fmtPitch);
+  setSlider('pt-b', 'ptv-b', pt.b, fmtPitch);
+  setSlider('pt-t', 'ptv-t', pt.t, fmtPitch);
+  const g = s.gaps || {};
+  setSlider('gap-dialog', 'gap-dialog-val', g.dialog, fmtGap);
+  setSlider('gap-narr', 'gap-narr-val', g.narr, fmtGap);
+  if (s.voices) {
+    if (allVoices.length) ['a','b','t'].forEach(r => applyVoiceByName(r, s.voices[r]));
+    else pendingVoices = s.voices;
+  }
+  return true;
+}
+
+function noteMsg(msg) {
+  const el = document.getElementById('save-note');
+  el.textContent = msg;
+  setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 4000);
+}
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  const data = JSON.stringify(collectSettings(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  const d = new Date();
+  const stamp = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  a.href = URL.createObjectURL(blob);
+  a.download = '聽力設定_' + stamp + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  noteMsg('💾 已匯出設定檔（在「下載」或「檔案」中）');
+});
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const ok = applySettings(JSON.parse(reader.result));
+      noteMsg(ok ? '📂 設定已還原 ✓' : '⚠️ 檔案格式不正確');
+    } catch { noteMsg('⚠️ 無法讀取，請確認是本工具匯出的設定檔'); }
+    e.target.value = '';
+  };
+  reader.readAsText(f);
+});
+document.getElementById('btn-localsave').addEventListener('click', () => {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(collectSettings()));
+    noteMsg('🏠 已儲存到這台設備，下次打開自動還原 ✓');
+  } catch { noteMsg('⚠️ 此瀏覽器無法本機儲存（可能是無痕模式）'); }
+});
+(function autoRestore() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    applySettings(s);
+    const t = s.savedAt ? new Date(s.savedAt) : null;
+    noteMsg('🏠 已自動還原上次儲存的設定' + (t ? '（' + t.toLocaleDateString('zh-TW') + '）' : ''));
+  } catch {}
+})();
+</script>
+</body>
+</html>
