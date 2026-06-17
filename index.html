@@ -699,6 +699,13 @@ function populateAll() {
   });
   if (pool.length >= 2) document.getElementById('voice-b').selectedIndex = 1;
   if (pool.length >= 3) document.getElementById('voice-t').selectedIndex = 2;
+  // 同時填考試模式的聲音選單
+  ['a','b','t'].forEach(r => {
+    const el = document.getElementById('exam-voice-' + r);
+    if (el) el.innerHTML = opts;
+  });
+  if (pool.length >= 2) { const el = document.getElementById('exam-voice-b'); if(el) el.selectedIndex = 1; }
+  if (pool.length >= 3) { const el = document.getElementById('exam-voice-t'); if(el) el.selectedIndex = 2; }
   applyPendingVoices(); // 若有待還原的聲音設定，此時套用
 }
 
