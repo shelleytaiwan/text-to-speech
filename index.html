@@ -635,6 +635,7 @@
       <button class="btn-sec" onclick="examStart()">▶ 開始朗讀</button>
       <button class="btn-sec" onclick="examPreviewParse()">🔍 預覽結構</button>
       <button class="btn-sec" onclick="document.getElementById('exam-input').value=DEMO_EXAM">📄 載入示範</button>
+      <button class="btn-sec" onclick="examClear()">🗑 清除</button>
     </div>
   </div><!-- /panel-exam -->
 
@@ -1288,6 +1289,17 @@ function eFinish() {
   eSetPlayBtn(false);
   eSetStatus(eStopReq?'已停止':'完成 ✓', eStopReq?'':'done');
   if (!eStopReq) document.getElementById('e-prog-fill').style.width='100%';
+}
+
+function examClear() {
+  eStopReq=true; ePlaying=false; ePaused=false; synth.cancel();
+  document.getElementById('exam-input').value='';
+  document.getElementById('exam-log').classList.remove('visible');
+  document.getElementById('exam-log').innerHTML='';
+  document.getElementById('e-prog-fill').style.width='0%';
+  document.getElementById('e-seg-cur').textContent='0';
+  document.getElementById('e-seg-total').textContent='0 段';
+  eSetPlayBtn(false); eSetStatus('準備就緒');
 }
 
 document.getElementById('e-btn-play').addEventListener('click', () => {
