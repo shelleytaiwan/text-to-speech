@@ -353,8 +353,8 @@
     <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;">💡 iPad 只有少數聲音：三欄選同一聲音，男聲音調調低（0.75）、旁白標準（1.0）、女聲調高（1.15）</p>
 
     <div class="playback-bar">
-      <button class="btn-play" id="e-btn-play" title="播放 / 暫停">▶</button>
-      <button class="btn-stop" id="e-btn-stop" title="停止">■</button>
+      <button class="btn-play" id="e-btn-play" onclick="ePlayPause()" title="播放 / 暫停">▶</button>
+      <button class="btn-stop" id="e-btn-stop" onclick="eStop()" title="停止">■</button>
       <div class="progress-wrap">
         <div class="progress-bg"><div class="progress-fill" id="e-prog-fill" style="width:0%"></div></div>
         <div class="prog-labels"><span id="e-seg-cur">0</span><span id="e-seg-total">0 段</span></div>
@@ -897,18 +897,18 @@ function examClear() {
   eSetPlayBtn(false); eSetStatus('準備就緒');
 }
 
-document.getElementById('e-btn-play').addEventListener('click', () => {
+function ePlayPause() {
   if (!synth) return;
   if (!ePlaying && !ePaused) { eStart(); return; }
   if (ePlaying) { synth.pause(); ePlaying = false; ePaused = true; eSetPlayBtn(false); eSetStatus('已暫停', 'paused'); }
   else { synth.resume(); ePaused = false; ePlaying = true; eSetPlayBtn(true); eSetStatus('朗讀中...', 'playing'); }
-});
-document.getElementById('e-btn-stop').addEventListener('click', () => {
+}
+function eStop() {
   eStopReq = true; ePlaying = false; ePaused = false; synth.cancel();
   eSetPlayBtn(false); eSetStatus('已停止');
   document.getElementById('e-prog-fill').style.width = '0%';
   document.getElementById('e-seg-cur').textContent = '0';
-});
+}
 </script>
 </body>
 </html>
