@@ -369,8 +369,8 @@
   .pause-card label { font-size:13px; color:var(--text2); display:block; margin-bottom:8px; }
   .pause-card .pval { float:right; font-weight:600; color:var(--text); }
   .pause-card input[type=range] { width:100%; accent-color:var(--accent); }
-  .exam-voice-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:0.5rem; }
-  @media(max-width:480px){ .exam-voice-grid{grid-template-columns:1fr;} }
+  .exam-voice-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:0.5rem; }
+  @media(max-width:600px){ .exam-voice-grid{grid-template-columns:1fr;} }
   .exam-log { display:none; flex-direction:column; gap:6px; margin-bottom:1rem; max-height:240px; overflow-y:auto; }
   .exam-log.visible { display:flex; }
   .elog-item { padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); font-size:13px; line-height:1.6; color:var(--text2); display:flex; align-items:flex-start; gap:10px; }
@@ -606,8 +606,18 @@
           <span class="spv" id="exam-ptv-b">高 1.15</span>
         </div>
       </div>
+      <div class="voice-card">
+        <div class="role-label col-t"><span class="dot dot-t"></span>旁白（老師）</div>
+        <select id="exam-voice-t"></select>
+        <button class="preview-btn" onclick="examPreview('t')">▶ 試聽</button>
+        <div class="speed-row">
+          <label>音調</label>
+          <input type="range" id="exam-pt-t" min="0.5" max="1.5" step="0.05" value="1.0" oninput="document.getElementById('exam-ptv-t').textContent=fmtPitch(this.value)">
+          <span class="spv" id="exam-ptv-t">標準</span>
+        </div>
+      </div>
     </div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;">💡 iPad 只有一兩種聲音：兩欄選同一聲音，左邊音調調低模擬男聲，右邊調高模擬女聲</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;">💡 iPad 只有少數聲音：三欄選同一聲音，男聲音調調低（0.75）、旁白標準（1.0）、女聲調高（1.15）</p>
 
     <div class="playback-bar">
       <button class="btn-play" id="e-btn-play" title="播放 / 暫停">▶</button>
@@ -1088,7 +1098,9 @@ function examSyncVoices() {
   }
   document.getElementById('exam-voice-a').innerHTML = opts;
   document.getElementById('exam-voice-b').innerHTML = opts;
+  document.getElementById('exam-voice-t').innerHTML = opts;
   if (pool.length >= 2) document.getElementById('exam-voice-b').selectedIndex = 1;
+  if (pool.length >= 3) document.getElementById('exam-voice-t').selectedIndex = 2;
 }
 
 /* ── 考試模式：常數 ── */
@@ -1132,7 +1144,7 @@ function parseExam(text) {
     if (line.startsWith('#')) {
       const t = line.replace(/^#+\s*/, '');
       segs.push({ type:'pause', dur: titlePause/2, label:`停頓 ${(titlePause/2).toFixed(1)}s`, tag:'etag-pause' });
-      segs.push({ type:'speak', text:t, rate:titleRate, role:'b', label:'標題', tag:'etag-title' });
+      segs.push({ type:'speak', text:t, rate:titleRate, role:'t', label:'標題', tag:'etag-title' });
       segs.push({ type:'pause', dur: titlePause, label:`停頓 ${titlePause.toFixed(1)}s`, tag:'etag-pause' });
 
     } else if (/^\d+[\.、]/.test(line)) {
@@ -1140,14 +1152,14 @@ function parseExam(text) {
       const zh = qNum <= 30 ? ZH_NUM[qNum] : String(qNum);
       const body = line.replace(/^\d+[\.、]\s*/, '');
       segs.push({ type:'pause', dur: qPause, label:`停頓 ${qPause.toFixed(1)}s`, tag:'etag-pause' });
-      segs.push({ type:'speak', text:`第${zh}題。${body}`, rate:qRate, role:'b', label:`第${zh}題`, tag:'etag-q' });
+      segs.push({ type:'speak', text:`第${zh}題。${body}`, rate:qRate, role:'t', label:`第${zh}題`, tag:'etag-q' });
       segs.push({ type:'pause', dur: qPause/2, label:`停頓 ${(qPause/2).toFixed(1)}s`, tag:'etag-pause' });
 
     } else if (/^[A-D][\.、]/.test(line)) {
       const letter = line[0];
       const body = line.replace(/^[A-D][\.、]\s*/, '');
       segs.push({ type:'pause', dur: optPause, label:`停頓 ${optPause.toFixed(1)}s`, tag:'etag-pause' });
-      segs.push({ type:'speak', text:`${letter}。${body}`, rate:1.0, role:'b', label:`選項 ${letter}`, tag:'etag-opt' });
+      segs.push({ type:'speak', text:`${letter}。${body}`, rate:1.0, role:'t', label:`選項 ${letter}`, tag:'etag-opt' });
 
     } else if (/^男[：:]/.test(line)) {
       segs.push({ type:'speak', text:line.replace(/^男[：:]\s*/,''), rate:dialRate, role:'a', label:'男', tag:'etag-dial' });
@@ -1158,7 +1170,7 @@ function parseExam(text) {
     } else if (/^B[：:]/.test(line)) {
       segs.push({ type:'speak', text:line.replace(/^B[：:]\s*/,''), rate:dialRate, role:'b', label:'B', tag:'etag-dial' });
     } else {
-      segs.push({ type:'speak', text:line, rate:qRate, role:'b', label:'說明', tag:'etag-narr' });
+      segs.push({ type:'speak', text:line, rate:qRate, role:'t', label:'說明', tag:'etag-narr' });
     }
   }
   return segs;
@@ -1166,8 +1178,8 @@ function parseExam(text) {
 
 function examPreview(role) {
   synth.cancel();
-  const text = role === 'a' ? '你好，我是男生角色。' : '你好，我是女生角色。';
-  const u = new SpeechSynthesisUtterance(text);
+  const texts = { a:'你好，我是男生角色。', b:'你好，我是女生角色。', t:'同學，請注意聽，現在開始題目。' };
+  const u = new SpeechSynthesisUtterance(texts[role] || texts.t);
   u.rate = 0.85;
   u.pitch = parseFloat(document.getElementById('exam-pt-' + role).value);
   const idx = parseInt(document.getElementById('exam-voice-' + role).value);
@@ -1239,8 +1251,10 @@ async function eSpeakSeg(idx) {
   await new Promise(res => {
     const u = new SpeechSynthesisUtterance(seg.text);
     u.rate = seg.rate || 1.0;
-    u.pitch = parseFloat(document.getElementById('exam-pt-'+seg.role).value);
-    const idx2 = parseInt(document.getElementById('exam-voice-'+seg.role).value);
+    const roleEl = document.getElementById('exam-pt-'+seg.role);
+    u.pitch = roleEl ? parseFloat(roleEl.value) : 1.0;
+    const voiceEl = document.getElementById('exam-voice-'+seg.role);
+    const idx2 = voiceEl ? parseInt(voiceEl.value) : -1;
     if (!isNaN(idx2) && allVoices[idx2]) u.voice = allVoices[idx2];
     u.onend = res; u.onerror = res;
     synth.speak(u);
