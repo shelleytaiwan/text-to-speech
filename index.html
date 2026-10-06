@@ -254,9 +254,10 @@
     <details class="rec-help">
       <summary>📱 iPad 只有兩種聲音？解決方法</summary>
       <div class="rec-body">
-        <strong>方法一：用「音調」做出男聲（最可靠）</strong><br>
+        <strong>方法一：選單裡的「🎭 模擬男聲」直接播放；或選「雲揚／雲健／雲夏 ↗」，會帶著全部文字和秒數設定跳到 Claude，生成真男聲的音檔網頁</strong><br><br>
+        <strong>方法二：自己用「音調」做出男聲</strong><br>
         把 A 角色的<strong>音調拉低到 0.6～0.7</strong>，聽起來就像男聲；B 保持標準；旁白可微調高。<br><br>
-        <strong>方法二：嘗試下載更多聲音</strong><br>
+        <strong>方法三：嘗試下載更多聲音</strong><br>
         設定 → 輔助使用 → 朗讀內容 → 聲音 → 中文，下載 <strong>Eddy、Reed、Rocko</strong>，完全關閉 Safari 再重開。<br><br>
         <button class="btn-sec" type="button" onclick="showVoiceList()">🔍 顯示此設備開放的全部聲音</button>
         <div id="voice-list-out" style="margin-top:8px;font-size:13px;line-height:1.8;"></div>
@@ -396,17 +397,34 @@ function getPool() {
   return filtered.length >= 3 ? filtered : base;
 }
 
+/* 微軟男聲：網頁無法即時產生，選了就帶著全部內容跳到 Claude 生成音檔 */
+const MS_MALE = {
+  'zh-CN-YunyangNeural': '雲揚（男記者）',
+  'zh-CN-YunjianNeural': '雲健（中年男）',
+  'zh-CN-YunxiaNeural':  '雲夏（小男孩）'
+};
+const SIM_MALE = 'sim-male';
+
 function buildOpts() {
   const pool = getPool();
-  if (pool.length) {
-    return pool.map(v => `<option value="${allVoices.indexOf(v)}">${v.name} (${v.lang})</option>`).join('');
-  }
-  return `<option value="-1">系統預設聲音</option>`;
+  const base = pool.length
+    ? pool.map(v => `<option value="${allVoices.indexOf(v)}">${v.name} (${v.lang})</option>`).join('')
+    : `<option value="-1">系統預設聲音</option>`;
+  const male = `<optgroup label="男聲">
+    <option value="${SIM_MALE}">🎭 模擬男聲（直接播放）</option>
+    ${Object.entries(MS_MALE).map(([id, name]) => `<option value="ms:${id}">${name} ↗ 跳到 Claude 生成</option>`).join('')}
+  </optgroup>`;
+  return base + male;
 }
 
 function populateAll() {
   const opts = buildOpts();
   const pool = getPool();
+  // 重建選單前記下模擬男聲／微軟男聲的選擇，避免聲音清單更新時被洗掉
+  const keep = {};
+  document.querySelectorAll('.voice-card select').forEach(sel => {
+    if (sel.value === SIM_MALE || sel.value.startsWith('ms:')) keep[sel.id] = sel.value;
+  });
   // 對話模式
   ['a','b','t'].forEach(r => { document.getElementById('voice-' + r).innerHTML = opts; });
   if (pool.length >= 2) document.getElementById('voice-b').selectedIndex = 1;
@@ -415,6 +433,7 @@ function populateAll() {
   ['a','b','t'].forEach(r => { document.getElementById('ev-voice-' + r).innerHTML = opts; });
   if (pool.length >= 2) document.getElementById('ev-voice-b').selectedIndex = 1;
   if (pool.length >= 3) document.getElementById('ev-voice-t').selectedIndex = 2;
+  Object.entries(keep).forEach(([id, val]) => { document.getElementById(id).value = val; });
   applyPendingVoices();
 }
 
@@ -452,6 +471,103 @@ function getVoice(selectId) {
   const idx = parseInt(document.getElementById(selectId).value);
   return (!isNaN(idx) && allVoices[idx]) ? allVoices[idx] : null;
 }
+function isMsVoice(selectId) { return document.getElementById(selectId).value.startsWith('ms:'); }
+
+// 模擬男聲：用此設備的中文聲音（優先台灣），音調再壓低
+function simMaleVoice() {
+  const pool = getPool();
+  return pool.find(v => v.lang.startsWith('zh-TW')) || pool[0] || null;
+}
+function applyVoice(u, selectId) {
+  if (document.getElementById(selectId).value === SIM_MALE) {
+    const v = simMaleVoice();
+    if (v) u.voice = v;
+    u.pitch = Math.max(0.1, u.pitch * 0.6);
+    return;
+  }
+  const v = getVoice(selectId);
+  if (v) u.voice = v;
+}
+
+/* ════════ 跳到 Claude 生成 ════════ */
+function voiceDesc(selectId, pitchId) {
+  const val = document.getElementById(selectId).value;
+  const pitch = document.getElementById(pitchId).value;
+  if (val.startsWith('ms:')) return `${MS_MALE[val.slice(3)]}＝微軟 ${val.slice(3)}`;
+  if (val === SIM_MALE) return `模擬男聲 → 請改用微軟 zh-CN-YunyangNeural（雲揚）`;
+  const v = getVoice(selectId);
+  return `iPad 聲音「${v ? v.name + '（' + v.lang + '）' : '系統預設'}」→ 請改用最接近的微軟聲音（女聲用 zh-TW-HsiaoChenNeural 或 zh-CN-XiaoxiaoNeural），音調 ${pitch}（1＝標準）`;
+}
+
+const CLAUDE_COMMON = `請用 edge-tts（微軟語音）幫我把下面的內容每一句都生成 mp3，做成一個 HTML 網頁（音檔用 base64 內嵌在網頁裡），讓我在 iPad Safari 直接打開就能聽，不用連網、不用金鑰。
+網頁要求：一行一行顯示文字並標示目前朗讀到哪一行；有 ▶ 播放／⏸ 暫停／■ 停止；點任一行可以單獨重播；停頓秒數照下面設定（停頓用計時器，不要做成靜音音檔）。
+速度換算：0.65× → edge-tts rate -35%，1.00× → +0%，以此類推。`;
+
+function buildDialogPrompt() {
+  const g = id => document.getElementById(id).value;
+  return `${CLAUDE_COMMON}
+
+【模式】對話練習
+【角色規則】「A：」開頭 → A 角色；「B：」開頭 → B 角色；其他行 → 旁白
+【聲音】
+- A 角色：${voiceDesc('voice-a','pt-a')}，速度 ${g('sp-a')}×
+- B 角色：${voiceDesc('voice-b','pt-b')}，速度 ${g('sp-b')}×
+- 旁白：${voiceDesc('voice-t','pt-t')}，速度 ${g('sp-t')}×
+【停頓】A、B 對話之間 ${fmtGap(g('gap-dialog'))}；旁白的前後 ${fmtGap(g('gap-narr'))}
+
+【內容】
+${g('dialogue-input').trim()}`;
+}
+
+function buildExamPrompt() {
+  const g = id => document.getElementById(id).value;
+  return `${CLAUDE_COMMON}
+
+【模式】聽力考試
+【解析規則】
+- 「# 標題」→ 旁白慢讀，語速 ${(g('er-title-rate')/100).toFixed(2)}×，前停頓 ${(g('er-title-pause')/20).toFixed(1)} 秒、後停頓 ${(g('er-title-pause')/10).toFixed(1)} 秒
+- 「1. 題目」（或 1、）→ 旁白唸「第一題。題目」，語速 ${(g('er-q-rate')/100).toFixed(2)}×，前停頓 ${(g('er-q-pause')/10).toFixed(1)} 秒、後停頓 ${(g('er-q-pause')/20).toFixed(1)} 秒
+- 「A. 選項」（或 A、，A～D）→ 旁白唸「A。選項」，語速 1.00×，前停頓 ${(g('er-opt-pause')/10).toFixed(1)} 秒
+- 「男：」或「A：」→ 男聲；「女：」或「B：」→ 女聲；對話語速 ${(g('er-dial-rate')/100).toFixed(2)}×
+- 其他行 → 旁白說明，語速同題目
+【聲音】
+- 男聲（男：/ A：）：${voiceDesc('ev-voice-a','ev-pt-a')}
+- 女聲（女：/ B：）：${voiceDesc('ev-voice-b','ev-pt-b')}
+- 旁白（老師）：${voiceDesc('ev-voice-t','ev-pt-t')}
+
+【考卷內容】
+${g('exam-input').trim()}`;
+}
+
+function sendToClaude(mode) {
+  const text = document.getElementById(mode === 'exam' ? 'exam-input' : 'dialogue-input').value.trim();
+  if (!text) { alert('請先輸入內容，再跳到 Claude 生成。'); return; }
+  // 先存一份，回來時內容還在
+  try { localStorage.setItem(LS_KEY, JSON.stringify(collectSettings())); } catch {}
+  const prompt = mode === 'exam' ? buildExamPrompt() : buildDialogPrompt();
+  try { navigator.clipboard && navigator.clipboard.writeText(prompt).catch(() => {}); } catch {}
+  const url = 'https://claude.ai/new?q=' + encodeURIComponent(prompt);
+  const w = window.open(url, '_blank');
+  if (!w) location.href = url;
+}
+
+// 有選微軟男聲 → 播放/試聽改成跳到 Claude
+function msJump(mode, roles) {
+  const prefix = mode === 'exam' ? 'ev-voice-' : 'voice-';
+  if (!roles.some(r => isMsVoice(prefix + r))) return false;
+  sendToClaude(mode);
+  return true;
+}
+
+function onVoiceChange(e) {
+  if (!e.target.value.startsWith('ms:')) return;
+  const mode = e.target.id.startsWith('ev-') ? 'exam' : 'dialog';
+  if (confirm(`${MS_MALE[e.target.value.slice(3)]} 需要由 Claude 生成音檔。\n\n現在就帶著全部文字和秒數設定跳到 Claude 嗎？\n（按「取消」可以先設定其他角色，之後按 ▶ 播放時會自動跳過去）`)) sendToClaude(mode);
+}
+['a','b','t'].forEach(r => {
+  document.getElementById('voice-' + r).addEventListener('change', onVoiceChange);
+  document.getElementById('ev-voice-' + r).addEventListener('change', onVoiceChange);
+});
 function getPitch(pitchId) {
   return parseFloat(document.getElementById(pitchId).value);
 }
@@ -476,12 +592,12 @@ function switchTab(id) {
 const previewText = { a:'你好，我是A角色，很高興認識你。', b:'你好，我是B角色，很高興認識你。', t:'同學，請注意聽，現在開始題目。' };
 
 function preview(role) {
+  if (msJump('dialog', [role])) return;
   synth.cancel();
   const u = new SpeechSynthesisUtterance(previewText[role]);
   u.rate = parseFloat(document.getElementById('sp-' + role).value);
   u.pitch = getPitch('pt-' + role);
-  const v = getVoice('voice-' + role);
-  if (v) u.voice = v;
+  applyVoice(u, 'voice-' + role);
   synth.speak(u);
 }
 
@@ -534,8 +650,7 @@ async function dSpeakLine(idx) {
     const u = new SpeechSynthesisUtterance(l.text);
     u.rate = parseFloat(document.getElementById('sp-' + rk).value);
     u.pitch = getPitch('pt-' + rk);
-    const v = getVoice('voice-' + rk);
-    if (v) u.voice = v;
+    applyVoice(u, 'voice-' + rk);
     u.onend = res; u.onerror = res;
     synth.speak(u);
   });
@@ -559,6 +674,7 @@ async function dSpeakLine(idx) {
 }
 
 function dStart() {
+  if (msJump('dialog', ['a','b','t'])) return;
   const text = document.getElementById('dialogue-input').value.trim();
   if (!text) { dSetStatus('請輸入內容'); return; }
   dLines = parseLines(text);
@@ -625,7 +741,7 @@ B：那，黑、黃、藍各兩件。
 const LS_KEY = 'tts-dialog-settings';
 
 function collectSettings() {
-  const voiceName = r => { const sel = document.getElementById('voice-' + r); const v = allVoices[parseInt(sel.value)]; return v ? { name: v.name, lang: v.lang } : null; };
+  const voiceName = r => { const sel = document.getElementById('voice-' + r); if (sel.value === SIM_MALE || sel.value.startsWith('ms:')) return { special: sel.value }; const v = allVoices[parseInt(sel.value)]; return v ? { name: v.name, lang: v.lang } : null; };
   return {
     version: 1, savedAt: new Date().toISOString(),
     text: document.getElementById('dialogue-input').value,
@@ -648,6 +764,7 @@ function applyVoiceByName(selectId, saved) {
   if (!saved) return;
   const sel = document.getElementById(selectId);
   if (!sel) return;
+  if (saved.special) { if ([...sel.options].some(o => o.value === saved.special)) sel.value = saved.special; return; }
   let idx = allVoices.findIndex(v => v.name === saved.name && v.lang === saved.lang);
   if (idx === -1) idx = allVoices.findIndex(v => v.name === saved.name);
   if (idx === -1) return;
@@ -670,8 +787,8 @@ function applySettings(s) {
   const g = s.gaps || {};
   setSlider('gap-dialog','gap-dialog-val',g.dialog,fmtGap); setSlider('gap-narr','gap-narr-val',g.narr,fmtGap);
   if (s.voices) {
-    if (allVoices.length) ['a','b','t'].forEach(r => applyVoiceByName('voice-' + r, s.voices[r]));
-    else pendingVoices = s.voices;
+    ['a','b','t'].forEach(r => applyVoiceByName('voice-' + r, s.voices[r]));
+    if (!allVoices.length) pendingVoices = s.voices;
   }
   return true;
 }
@@ -730,13 +847,13 @@ B. 六點半
 C. 七點`;
 
 function examPreview(role) {
+  if (msJump('exam', [role])) return;
   synth.cancel();
   const texts = { a:'你好，我是男生角色。', b:'你好，我是女生角色。', t:'同學，請注意聽，現在開始題目。' };
   const u = new SpeechSynthesisUtterance(texts[role]);
   u.rate = 0.85;
   u.pitch = getPitch('ev-pt-' + role);
-  const v = getVoice('ev-voice-' + role);
-  if (v) u.voice = v;
+  applyVoice(u, 'ev-voice-' + role);
   synth.speak(u);
 }
 
@@ -855,8 +972,7 @@ async function eSpeakSeg(idx) {
     const u = new SpeechSynthesisUtterance(seg.text);
     u.rate = seg.rate || 1.0;
     u.pitch = getPitch('ev-pt-' + seg.role);
-    const v = getVoice('ev-voice-' + seg.role);
-    if (v) u.voice = v;
+    applyVoice(u, 'ev-voice-' + seg.role);
     u.onend = res;
     u.onerror = res;
     synth.speak(u);
@@ -867,6 +983,7 @@ async function eSpeakSeg(idx) {
 }
 
 function eStart() {
+  if (msJump('exam', ['a','b','t'])) return;
   const text = document.getElementById('exam-input').value.trim();
   if (!text) { eSetStatus('請輸入考卷內容'); return; }
   eSegs = parseExam(text);
